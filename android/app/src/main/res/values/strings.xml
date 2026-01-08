@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Motiva</string>
+    <string name="widget_name">Daily Quote</string>
+    <string name="widget_description">Display your daily wisdom on your home screen</string>
+    <string name="widget_loading">Loading...</string>
+    <string name="widget_default_quote">The happiness of your life depends upon the quality of your thoughts.</string>
+    <string name="widget_default_author">Marcus Aurelius</string>
+</resources>
