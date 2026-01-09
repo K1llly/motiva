@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/utils/string_utils.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../quote/domain/entities/quote.dart';
 
 class ShareBottomSheet extends StatelessWidget {
@@ -10,6 +11,8 @@ class ShareBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -29,7 +32,7 @@ class ShareBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Share Quote',
+            l10n.shareQuote,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -40,27 +43,27 @@ class ShareBottomSheet extends StatelessWidget {
             children: [
               _ShareOption(
                 icon: Icons.camera_alt,
-                label: 'Instagram',
+                label: l10n.instagram,
                 color: const Color(0xFFE4405F),
-                onTap: () => _shareToInstagram(context),
+                onTap: () => _shareToInstagram(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.alternate_email,
-                label: 'Twitter',
+                label: l10n.twitter,
                 color: const Color(0xFF1DA1F2),
-                onTap: () => _shareToTwitter(context),
+                onTap: () => _shareToTwitter(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.chat_bubble,
-                label: 'WhatsApp',
+                label: l10n.whatsapp,
                 color: const Color(0xFF25D366),
-                onTap: () => _shareToWhatsApp(context),
+                onTap: () => _shareToWhatsApp(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.more_horiz,
-                label: 'More',
+                label: l10n.more,
                 color: Theme.of(context).colorScheme.secondary,
-                onTap: () => _shareGeneric(context),
+                onTap: () => _shareGeneric(context, l10n),
               ),
             ],
           ),
@@ -68,7 +71,7 @@ class ShareBottomSheet extends StatelessWidget {
           SafeArea(
             child: TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
           ),
         ],
@@ -80,27 +83,27 @@ class ShareBottomSheet extends StatelessWidget {
     return StringUtils.formatQuoteForSharing(quote.text, quote.author);
   }
 
-  void _shareToInstagram(BuildContext context) {
+  void _shareToInstagram(BuildContext context, AppLocalizations l10n) {
     final text = _getShareText();
-    Share.share(text, subject: 'Daily Stoic Quote');
+    Share.share(text, subject: l10n.dailyStoicQuote);
     Navigator.pop(context);
   }
 
-  void _shareToTwitter(BuildContext context) {
+  void _shareToTwitter(BuildContext context, AppLocalizations l10n) {
     final text = _getShareText();
-    Share.share(text, subject: 'Daily Stoic Quote');
+    Share.share(text, subject: l10n.dailyStoicQuote);
     Navigator.pop(context);
   }
 
-  void _shareToWhatsApp(BuildContext context) {
+  void _shareToWhatsApp(BuildContext context, AppLocalizations l10n) {
     final text = _getShareText();
-    Share.share(text, subject: 'Daily Stoic Quote');
+    Share.share(text, subject: l10n.dailyStoicQuote);
     Navigator.pop(context);
   }
 
-  void _shareGeneric(BuildContext context) {
+  void _shareGeneric(BuildContext context, AppLocalizations l10n) {
     final text = _getShareText();
-    Share.share(text, subject: 'Daily Stoic Quote');
+    Share.share(text, subject: l10n.dailyStoicQuote);
     Navigator.pop(context);
   }
 }

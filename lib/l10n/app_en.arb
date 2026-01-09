@@ -1,0 +1,158 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Motiva",
+  "@appTitle": {
+    "description": "The app title displayed in the app bar"
+  },
+
+  "viewMeaning": "View Meaning",
+  "@viewMeaning": {
+    "description": "Button text to view the meaning of a quote"
+  },
+
+  "share": "Share",
+  "@share": {
+    "description": "Button text to share a quote"
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button text to retry a failed operation"
+  },
+
+  "save": "Save",
+  "@save": {
+    "description": "Button text to save settings"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button text to cancel an action"
+  },
+
+  "apply": "Apply",
+  "@apply": {
+    "description": "Button text to apply a selection"
+  },
+
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+
+  "language": "Language",
+  "@language": {
+    "description": "Language setting label"
+  },
+
+  "widgetAppearance": "Widget Appearance",
+  "@widgetAppearance": {
+    "description": "Widget customization screen title"
+  },
+
+  "quoteMeaning": "Quote Meaning",
+  "@quoteMeaning": {
+    "description": "Quote detail screen title"
+  },
+
+  "whatThisMeans": "What This Means",
+  "@whatThisMeans": {
+    "description": "Section title for quote meaning explanation"
+  },
+
+  "frostedGlassEffect": "Frosted Glass Effect",
+  "@frostedGlassEffect": {
+    "description": "Toggle title for glass effect on widget"
+  },
+
+  "frostedGlassDescription": "Use a crystallized glass-like background",
+  "@frostedGlassDescription": {
+    "description": "Description for frosted glass effect toggle"
+  },
+
+  "backgroundColor": "Background Color",
+  "@backgroundColor": {
+    "description": "Background color picker title"
+  },
+
+  "textColor": "Text Color",
+  "@textColor": {
+    "description": "Text color picker title"
+  },
+
+  "tapToChange": "Tap to change",
+  "@tapToChange": {
+    "description": "Subtitle indicating color picker can be tapped"
+  },
+
+  "disabledWhenGlassOn": "Disabled when glass effect is on",
+  "@disabledWhenGlassOn": {
+    "description": "Subtitle when background color is disabled"
+  },
+
+  "widgetUpdatedSuccessfully": "Widget updated successfully",
+  "@widgetUpdatedSuccessfully": {
+    "description": "Snackbar message after widget settings are saved"
+  },
+
+  "widgetInfoMessage": "After saving, you may need to remove and re-add the widget on your home screen to see the changes.",
+  "@widgetInfoMessage": {
+    "description": "Info message about widget updates"
+  },
+
+  "shareQuote": "Share Quote",
+  "@shareQuote": {
+    "description": "Share bottom sheet title"
+  },
+
+  "instagram": "Instagram",
+  "@instagram": {
+    "description": "Instagram share option label"
+  },
+
+  "twitter": "Twitter",
+  "@twitter": {
+    "description": "Twitter share option label"
+  },
+
+  "whatsapp": "WhatsApp",
+  "@whatsapp": {
+    "description": "WhatsApp share option label"
+  },
+
+  "more": "More",
+  "@more": {
+    "description": "More share options label"
+  },
+
+  "selectColor": "Select Color",
+  "@selectColor": {
+    "description": "Color picker sheet title"
+  },
+
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  },
+
+  "turkish": "Türkçe",
+  "@turkish": {
+    "description": "Turkish language name"
+  },
+
+  "german": "Deutsch",
+  "@german": {
+    "description": "German language name"
+  },
+
+  "russian": "Русский",
+  "@russian": {
+    "description": "Russian language name"
+  },
+
+  "dailyStoicQuote": "Daily Stoic Quote",
+  "@dailyStoicQuote": {
+    "description": "Subject text when sharing a quote"
+  }
+}

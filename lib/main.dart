@@ -6,6 +6,8 @@ import 'features/quote/data/datasources/quote_local_datasource.dart';
 import 'features/quote/data/models/quote_model.dart';
 import 'features/home_widget/domain/usecases/update_widget_data.dart';
 import 'features/quote/domain/usecases/get_daily_quote.dart';
+import 'features/notifications/presentation/services/notification_service.dart';
+import 'features/notifications/domain/usecases/schedule_daily_notification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,9 @@ void main() async {
 
   // Initialize widget with current quote
   await _initializeWidget();
+
+  // Initialize notifications
+  await _initializeNotifications();
 
   runApp(const MotivaApp());
 }
@@ -59,5 +64,44 @@ Future<void> _initializeWidget() async {
   } catch (e) {
     // Widget initialization is not critical - app should still run
     debugPrint('Widget initialization error: $e');
+  }
+}
+
+/// Initialize notifications and schedule daily quote notification
+Future<void> _initializeNotifications() async {
+  try {
+    final notificationService = di.sl<NotificationService>();
+    final scheduleDailyNotification = di.sl<ScheduleDailyNotification>();
+    final dateUtilsService = di.sl<di.DateUtilsService>();
+    final getDailyQuote = di.sl<GetDailyQuote>();
+
+    // Initialize the notification service
+    await notificationService.initialize();
+
+    // Request notification permissions
+    await notificationService.requestPermissions();
+
+    // Try to schedule daily notification
+    try {
+      await scheduleDailyNotification(const ScheduleNotificationParams());
+    } catch (e) {
+      debugPrint('Could not schedule daily notification: $e');
+    }
+
+    // Show an immediate notification with today's quote (for testing)
+    final dayNumber = dateUtilsService.getCurrentDayNumber();
+    final quoteResult = await getDailyQuote(GetDailyQuoteParams(dayNumber: dayNumber));
+    quoteResult.fold(
+      (failure) => debugPrint('Failed to get quote for notification: ${failure.message}'),
+      (quote) async {
+        await notificationService.showNotification(
+          quoteText: quote.text,
+          author: quote.author,
+        );
+      },
+    );
+  } catch (e) {
+    // Notification initialization is not critical - app should still run
+    debugPrint('Notification initialization error: $e');
   }
 }

@@ -35,10 +35,27 @@ import '../features/sharing/data/repositories/share_repository_impl.dart';
 
 // Widget Feature
 import '../features/home_widget/domain/repositories/widget_repository.dart';
+import '../features/home_widget/domain/repositories/widget_settings_repository.dart';
 import '../features/home_widget/domain/usecases/update_widget_data.dart';
 import '../features/home_widget/domain/usecases/sync_widget_quote.dart';
+import '../features/home_widget/domain/usecases/get_widget_settings.dart';
+import '../features/home_widget/domain/usecases/update_widget_appearance.dart';
 import '../features/home_widget/data/datasources/widget_datasource.dart';
+import '../features/home_widget/data/datasources/widget_settings_datasource.dart';
 import '../features/home_widget/data/repositories/widget_repository_impl.dart';
+import '../features/home_widget/data/repositories/widget_settings_repository_impl.dart';
+import '../features/home_widget/presentation/bloc/widget_settings_bloc.dart';
+
+// Notification Feature
+import '../features/notifications/domain/repositories/notification_repository.dart';
+import '../features/notifications/domain/usecases/schedule_daily_notification.dart';
+import '../features/notifications/data/repositories/notification_repository_impl.dart';
+import '../features/notifications/presentation/services/notification_service.dart';
+
+// Settings Feature
+import '../features/settings/domain/repositories/settings_repository.dart';
+import '../features/settings/data/repositories/settings_repository_impl.dart';
+import '../features/settings/presentation/bloc/settings_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -54,6 +71,8 @@ Future<void> init() async {
   _initStreakFeature();
   _initSharingFeature();
   _initWidgetFeature();
+  _initNotificationFeature();
+  _initSettingsFeature();
 }
 
 Future<void> _initExternal() async {
@@ -155,18 +174,69 @@ void _initSharingFeature() {
 }
 
 void _initWidgetFeature() {
+  // BLoC
+  sl.registerFactory(
+    () => WidgetSettingsBloc(
+      getWidgetSettings: sl(),
+      updateWidgetAppearance: sl(),
+    ),
+  );
+
   // Use Cases
   sl.registerLazySingleton(() => UpdateWidgetData(sl()));
   sl.registerLazySingleton(() => SyncWidgetQuote(sl()));
+  sl.registerLazySingleton(() => GetWidgetSettings(sl()));
+  sl.registerLazySingleton(() => UpdateWidgetAppearance(
+        settingsRepository: sl(),
+        widgetRepository: sl(),
+      ));
 
   // Repository
   sl.registerLazySingleton<WidgetRepository>(
     () => WidgetRepositoryImpl(dataSource: sl()),
   );
+  sl.registerLazySingleton<WidgetSettingsRepository>(
+    () => WidgetSettingsRepositoryImpl(dataSource: sl()),
+  );
 
   // Data Sources
   sl.registerLazySingleton<WidgetDataSource>(
     () => WidgetDataSourceImpl(),
+  );
+  sl.registerLazySingleton<WidgetSettingsDataSource>(
+    () => WidgetSettingsDataSourceImpl(),
+  );
+}
+
+void _initNotificationFeature() {
+  // Service
+  sl.registerLazySingleton(() => NotificationService());
+
+  // Use Cases
+  sl.registerLazySingleton(
+    () => ScheduleDailyNotification(
+      notificationService: sl(),
+      notificationRepository: sl(),
+      getDailyQuote: sl(),
+      getCurrentDayNumber: () => sl<DateUtilsService>().getCurrentDayNumber(),
+    ),
+  );
+
+  // Repository
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(sl()),
+  );
+}
+
+void _initSettingsFeature() {
+  // BLoC
+  sl.registerFactory(
+    () => SettingsBloc(sl()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(sl()),
   );
 }
 

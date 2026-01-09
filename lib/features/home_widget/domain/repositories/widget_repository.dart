@@ -14,4 +14,7 @@ abstract class WidgetRepository {
 
   /// Get last widget update time
   Future<Either<Failure, DateTime?>> getLastUpdateTime();
+
+  /// Trigger widget refresh after appearance changes
+  Future<Either<Failure, void>> refreshWidget();
 }

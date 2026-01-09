@@ -55,4 +55,16 @@ class WidgetRepositoryImpl implements WidgetRepository {
       return Left(WidgetFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> refreshWidget() async {
+    try {
+      await dataSource.updateWidget();
+      return const Right(null);
+    } on WidgetException catch (e) {
+      return Left(WidgetFailure(e.message));
+    } catch (e) {
+      return Left(WidgetFailure('Failed to refresh widget: ${e.toString()}'));
+    }
+  }
 }

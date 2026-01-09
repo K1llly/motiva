@@ -14,4 +14,9 @@ class WidgetConstants {
   /// Widget identifiers
   static const String iOSWidgetName = 'MotivaWidget';
   static const String androidWidgetName = 'com.motiva.stoic_mind.widget.MotivaWidgetReceiver';
+
+  /// Widget appearance keys
+  static const String backgroundColorKey = 'widget_background_color';
+  static const String textColorKey = 'widget_text_color';
+  static const String glassModeKey = 'widget_glass_mode';
 }

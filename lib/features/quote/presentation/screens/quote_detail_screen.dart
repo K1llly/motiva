@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/quote.dart';
 
 class QuoteDetailScreen extends StatelessWidget {
@@ -9,9 +10,11 @@ class QuoteDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quote Meaning'),
+        title: Text(l10n.quoteMeaning),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -54,7 +57,7 @@ class QuoteDetailScreen extends StatelessWidget {
 
             // Meaning section
             Text(
-              'What This Means',
+              l10n.whatThisMeans,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

@@ -17,4 +17,7 @@ class StorageKeys {
 
   // Quote randomization - unique shuffled order per user
   static const String shuffledQuoteOrder = 'shuffled_quote_order';
+
+  // Language settings
+  static const String selectedLanguage = 'selected_language';
 }

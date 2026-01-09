@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/quote.dart';
 import '../bloc/quote_bloc.dart';
 import '../bloc/quote_event.dart';
@@ -27,14 +28,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Motiva'),
+        title: Text(l10n.appTitle),
         centerTitle: true,
-        actions: const [
-          StreakCounter(),
-          SizedBox(width: 16),
+        leading: IconButton(
+          icon: const Icon(Icons.widgets_outlined),
+          tooltip: l10n.widgetAppearance,
+          onPressed: () => Navigator.pushNamed(context, '/widget-customization'),
+        ),
+        actions: [
+          const StreakCounter(),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: l10n.settings,
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: BlocListener<QuoteBloc, QuoteState>(
@@ -109,6 +122,8 @@ class _QuoteView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -126,12 +141,12 @@ class _QuoteView extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onViewMeaning,
                 icon: const Icon(Icons.lightbulb_outline),
-                label: const Text('View Meaning'),
+                label: Text(l10n.viewMeaning),
               ),
               ElevatedButton.icon(
                 onPressed: onShare,
                 icon: const Icon(Icons.share),
-                label: const Text('Share'),
+                label: Text(l10n.share),
               ),
             ],
           ),
@@ -153,6 +168,8 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -173,7 +190,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: Text(l10n.retry),
             ),
           ],
         ),

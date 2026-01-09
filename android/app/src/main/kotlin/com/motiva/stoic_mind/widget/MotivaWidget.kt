@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -19,6 +20,7 @@ import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
+import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -38,10 +40,27 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.motiva.stoic_mind.R
 
+/**
+ * Data class to hold widget appearance settings
+ * Using Int color values for compatibility with Glance ColorProvider
+ */
+data class WidgetAppearance(
+    val backgroundColor: Int,
+    val textColor: Int,
+    val secondaryTextColor: Int,
+    val isGlassMode: Boolean
+)
+
 class MotivaWidget : GlanceAppWidget() {
 
     // Use Exact mode to support all widget sizes dynamically
     override val sizeMode = SizeMode.Exact
+
+    // Default colors
+    companion object {
+        private const val DEFAULT_BACKGROUND_COLOR = 0xFF1A1A1A.toInt()
+        private const val DEFAULT_TEXT_COLOR = 0xFFFFFFFF.toInt()
+    }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val prefs = context.getSharedPreferences("HomeWidgetPreferences", Context.MODE_PRIVATE)
@@ -53,20 +72,63 @@ class MotivaWidget : GlanceAppWidget() {
     }
 
     /**
+     * Read widget appearance settings from SharedPreferences
+     * Colors may be stored as Long by Flutter's HomeWidget package
+     */
+    private fun getWidgetAppearance(prefs: SharedPreferences): WidgetAppearance {
+        // Read colors - they may be stored as Long or Int depending on the value
+        val backgroundColor = getColorFromPrefs(prefs, "widget_background_color", DEFAULT_BACKGROUND_COLOR)
+        val textColor = getColorFromPrefs(prefs, "widget_text_color", DEFAULT_TEXT_COLOR)
+        val isGlassMode = prefs.getBoolean("widget_glass_mode", false)
+
+        // Create secondary text color with reduced alpha (70% opacity)
+        val alpha = (textColor shr 24) and 0xFF
+        val reducedAlpha = ((alpha * 0.7f).toInt() and 0xFF) shl 24
+        val secondaryTextColor = (textColor and 0x00FFFFFF) or reducedAlpha
+
+        return WidgetAppearance(
+            backgroundColor = backgroundColor,
+            textColor = textColor,
+            secondaryTextColor = secondaryTextColor,
+            isGlassMode = isGlassMode
+        )
+    }
+
+    /**
+     * Safely read color from SharedPreferences
+     * Handles both Int and Long storage types
+     */
+    private fun getColorFromPrefs(prefs: SharedPreferences, key: String, default: Int): Int {
+        return try {
+            // First try to get as Long (Flutter may store as Long)
+            prefs.getLong(key, default.toLong()).toInt()
+        } catch (e: ClassCastException) {
+            try {
+                // Fall back to Int
+                prefs.getInt(key, default)
+            } catch (e2: Exception) {
+                default
+            }
+        }
+    }
+
+    /**
      * Calculate dynamic font size based on quote length
      * Longer quotes get smaller fonts to fit more text
+     * Increased base sizes for better readability
      */
     private fun calculateDynamicFontSize(
         quoteLength: Int,
         baseFontSize: Float,
-        minFontSize: Float = 9f
+        minFontSize: Float = 12f
     ): Float {
         return when {
             quoteLength < 50 -> baseFontSize
-            quoteLength < 100 -> baseFontSize - 1f
-            quoteLength < 150 -> baseFontSize - 2f
-            quoteLength < 200 -> baseFontSize - 3f
-            else -> minFontSize.coerceAtLeast(baseFontSize - 4f)
+            quoteLength < 100 -> baseFontSize - 2f
+            quoteLength < 150 -> baseFontSize - 3f
+            quoteLength < 200 -> baseFontSize - 4f
+            quoteLength < 300 -> baseFontSize - 5f
+            else -> minFontSize.coerceAtLeast(baseFontSize - 6f)
         }.coerceAtLeast(minFontSize)
     }
 
@@ -82,6 +144,9 @@ class MotivaWidget : GlanceAppWidget() {
         val author = prefs.getString("quote_author", null)
             ?: context.getString(R.string.widget_default_author)
 
+        // Get appearance settings
+        val appearance = getWidgetAppearance(prefs)
+
         // Determine widget layout based on aspect ratio and size
         val aspectRatio = if (height.value > 0) width.value / height.value else 1f
         val isNarrow = width < 120.dp  // 1xN formats (narrow vertical)
@@ -92,47 +157,121 @@ class MotivaWidget : GlanceAppWidget() {
         // 3x1 or similar short horizontal
         val isShort = height < 100.dp && !isWide
 
+        val padding = if (isShort || isNarrow || isWide) 12.dp else 16.dp
+
         GlanceTheme {
+            if (appearance.isGlassMode) {
+                // Glass mode - frosted glass effect
+                GlassContainer(
+                    modifier = GlanceModifier
+                        .fillMaxSize()
+                        .cornerRadius(20.dp)
+                        .clickable(actionRunCallback<OpenAppAction>())
+                        .padding(padding),
+                    appearance = appearance
+                ) {
+                    WidgetContent(
+                        quoteText = quoteText,
+                        author = author,
+                        appearance = appearance,
+                        isWide = isWide,
+                        isShort = isShort,
+                        isNarrow = isNarrow,
+                        isTall = isTall,
+                        height = height
+                    )
+                }
+            } else {
+                // Solid color background
+                Box(
+                    modifier = GlanceModifier
+                        .fillMaxSize()
+                        .background(ColorProvider(day = Color(appearance.backgroundColor), night = Color(appearance.backgroundColor)))
+                        .cornerRadius(20.dp)
+                        .clickable(actionRunCallback<OpenAppAction>())
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    WidgetContent(
+                        quoteText = quoteText,
+                        author = author,
+                        appearance = appearance,
+                        isWide = isWide,
+                        isShort = isShort,
+                        isNarrow = isNarrow,
+                        isTall = isTall,
+                        height = height
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Glass container with frosted glass effect
+     */
+    @Composable
+    private fun GlassContainer(
+        modifier: GlanceModifier,
+        appearance: WidgetAppearance,
+        content: @Composable () -> Unit
+    ) {
+        // Main glass background with semi-transparent white
+        Box(
+            modifier = modifier
+                .background(ColorProvider(day = Color(0x40FFFFFF), night = Color(0x40FFFFFF))),
+            contentAlignment = Alignment.Center
+        ) {
+            // Inner highlight layer for glass effect
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(GlanceTheme.colors.background)
-                    .cornerRadius(16.dp)
-                    .clickable(actionRunCallback<OpenAppAction>())
-                    .padding(if (isShort || isNarrow || isWide) 8.dp else 12.dp),
+                    .padding(2.dp)
+                    .cornerRadius(18.dp)
+                    .background(ColorProvider(day = Color(0x15FFFFFF), night = Color(0x15FFFFFF))),
                 contentAlignment = Alignment.Center
             ) {
-                when {
-                    isWide -> {
-                        // Wide horizontal (4x1) - more space for quote
-                        WideHorizontalContent(quoteText, author)
-                    }
-                    isShort -> {
-                        // Short horizontal (3x1, etc.)
-                        HorizontalContent(quoteText, author, height < 60.dp)
-                    }
-                    isNarrow -> {
-                        // Narrow vertical (1x2, 1x3, 1x4, etc.)
-                        NarrowVerticalContent(quoteText, author, isTall, height)
-                    }
-                    else -> {
-                        // Standard square/rectangular (2x2, 3x2, 4x4, etc.)
-                        StandardContent(quoteText, author, height)
-                    }
-                }
+                content()
             }
+        }
+    }
+
+    /**
+     * Main widget content dispatcher
+     */
+    @Composable
+    private fun WidgetContent(
+        quoteText: String,
+        author: String,
+        appearance: WidgetAppearance,
+        isWide: Boolean,
+        isShort: Boolean,
+        isNarrow: Boolean,
+        isTall: Boolean,
+        height: androidx.compose.ui.unit.Dp
+    ) {
+        when {
+            isWide -> WideHorizontalContent(quoteText, author, appearance)
+            isShort -> HorizontalContent(quoteText, author, height < 60.dp, appearance)
+            isNarrow -> NarrowVerticalContent(quoteText, author, isTall, height, appearance)
+            else -> StandardContent(quoteText, author, height, appearance)
         }
     }
 
     @Composable
     private fun WideHorizontalContent(
         quoteText: String,
-        author: String
+        author: String,
+        appearance: WidgetAppearance
     ) {
-        // Dynamic font size based on quote length
-        val quoteFontSize = calculateDynamicFontSize(quoteText.length, 13f, 10f).sp
+        // Dynamic font size based on quote length - increased base size
+        val quoteFontSize = calculateDynamicFontSize(quoteText.length, 18f, 14f).sp
         // More lines for longer quotes
-        val maxLines = if (quoteText.length > 100) 3 else 2
+        val maxLines = when {
+            quoteText.length > 150 -> 4
+            quoteText.length > 100 -> 3
+            else -> 2
+        }
 
         Row(
             modifier = GlanceModifier.fillMaxSize(),
@@ -147,22 +286,22 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = GlanceTheme.colors.onBackground,
+                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
                     textAlign = TextAlign.Start
                 ),
                 maxLines = maxLines
             )
 
-            Spacer(modifier = GlanceModifier.width(12.dp))
+            Spacer(modifier = GlanceModifier.width(16.dp))
 
             // Author on the right
             Text(
-                text = "- $author",
+                text = "— $author",
                 modifier = GlanceModifier.wrapContentWidth(),
                 style = TextStyle(
-                    fontSize = 11.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = GlanceTheme.colors.secondary,
+                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
                     textAlign = TextAlign.End
                 ),
                 maxLines = 1
@@ -174,15 +313,17 @@ class MotivaWidget : GlanceAppWidget() {
     private fun HorizontalContent(
         quoteText: String,
         author: String,
-        isVerySmall: Boolean
+        isVerySmall: Boolean,
+        appearance: WidgetAppearance
     ) {
-        // Dynamic font size based on quote length
-        val baseFontSize = if (isVerySmall) 10f else 12f
-        val quoteFontSize = calculateDynamicFontSize(quoteText.length, baseFontSize, 9f).sp
+        // Dynamic font size based on quote length - increased base sizes
+        val baseFontSize = if (isVerySmall) 14f else 16f
+        val quoteFontSize = calculateDynamicFontSize(quoteText.length, baseFontSize, 12f).sp
         // More lines for longer quotes
         val maxLines = when {
-            isVerySmall -> if (quoteText.length > 80) 2 else 1
-            quoteText.length > 120 -> 3
+            isVerySmall -> if (quoteText.length > 80) 3 else 2
+            quoteText.length > 150 -> 4
+            quoteText.length > 100 -> 3
             else -> 2
         }
 
@@ -198,18 +339,20 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = GlanceTheme.colors.onBackground,
+                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
                     textAlign = TextAlign.Start
                 ),
                 maxLines = maxLines
             )
 
+            Spacer(modifier = GlanceModifier.height(4.dp))
+
             Text(
-                text = "- $author",
+                text = "— $author",
                 style = TextStyle(
-                    fontSize = if (isVerySmall) 9.sp else 10.sp,
+                    fontSize = if (isVerySmall) 12.sp else 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = GlanceTheme.colors.secondary,
+                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
                     textAlign = TextAlign.Start
                 ),
                 maxLines = 1
@@ -222,21 +365,24 @@ class MotivaWidget : GlanceAppWidget() {
         quoteText: String,
         author: String,
         isTall: Boolean,
-        height: androidx.compose.ui.unit.Dp
+        height: androidx.compose.ui.unit.Dp,
+        appearance: WidgetAppearance
     ) {
-        // Dynamic font size based on quote length
-        val baseFontSize = if (isTall) 11f else 10f
-        val quoteFontSize = calculateDynamicFontSize(quoteText.length, baseFontSize, 8f).sp
+        // Dynamic font size based on quote length - increased base sizes
+        val baseFontSize = if (isTall) 16f else 14f
+        val quoteFontSize = calculateDynamicFontSize(quoteText.length, baseFontSize, 12f).sp
 
         // Calculate max lines based on height - increased for longer quotes
         val baseMaxLines = when {
-            height > 300.dp -> 12
+            height > 350.dp -> 16
+            height > 300.dp -> 14
+            height > 250.dp -> 12
             height > 200.dp -> 10
             height > 150.dp -> 8
             else -> 6
         }
         // Add extra lines for long quotes
-        val maxQuoteLines = if (quoteText.length > 150) baseMaxLines + 2 else baseMaxLines
+        val maxQuoteLines = if (quoteText.length > 150) baseMaxLines + 3 else baseMaxLines
 
         Column(
             modifier = GlanceModifier.fillMaxSize(),
@@ -250,21 +396,21 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = GlanceTheme.colors.onBackground,
+                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
                     textAlign = TextAlign.Center
                 ),
                 maxLines = maxQuoteLines
             )
 
-            Spacer(modifier = GlanceModifier.height(if (isTall) 12.dp else 6.dp))
+            Spacer(modifier = GlanceModifier.height(if (isTall) 16.dp else 8.dp))
 
             // Author at bottom
             Text(
-                text = "- $author",
+                text = "— $author",
                 style = TextStyle(
-                    fontSize = 9.sp,
+                    fontSize = if (isTall) 13.sp else 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = GlanceTheme.colors.secondary,
+                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
                     textAlign = TextAlign.Center
                 ),
                 maxLines = 1
@@ -276,35 +422,42 @@ class MotivaWidget : GlanceAppWidget() {
     private fun StandardContent(
         quoteText: String,
         author: String,
-        height: androidx.compose.ui.unit.Dp
+        height: androidx.compose.ui.unit.Dp,
+        appearance: WidgetAppearance
     ) {
+        // Increased base font sizes for better readability
         val baseQuoteFontSize = when {
-            height > 200.dp -> 15f
-            height > 150.dp -> 14f
-            else -> 13f
+            height > 250.dp -> 20f
+            height > 200.dp -> 18f
+            height > 150.dp -> 16f
+            else -> 15f
         }
         // Dynamic font size based on quote length
-        val quoteFontSize = calculateDynamicFontSize(quoteText.length, baseQuoteFontSize, 11f).sp
+        val quoteFontSize = calculateDynamicFontSize(quoteText.length, baseQuoteFontSize, 13f).sp
 
         val authorFontSize = when {
-            height > 200.dp -> 12.sp
-            height > 150.dp -> 11.sp
-            else -> 10.sp
+            height > 250.dp -> 15.sp
+            height > 200.dp -> 14.sp
+            height > 150.dp -> 13.sp
+            else -> 12.sp
         }
         // Calculate max lines based on height - increased for longer quotes
         val baseMaxLines = when {
-            height > 250.dp -> 10
-            height > 180.dp -> 8
+            height > 300.dp -> 14
+            height > 250.dp -> 12
+            height > 200.dp -> 10
+            height > 150.dp -> 8
             height > 120.dp -> 6
             else -> 5
         }
         // Add extra lines for long quotes
-        val maxQuoteLines = if (quoteText.length > 150) baseMaxLines + 2 else baseMaxLines
+        val maxQuoteLines = if (quoteText.length > 150) baseMaxLines + 3 else baseMaxLines
 
         val spacing = when {
-            height > 200.dp -> 10.dp
-            height > 150.dp -> 8.dp
-            else -> 6.dp
+            height > 250.dp -> 16.dp
+            height > 200.dp -> 12.dp
+            height > 150.dp -> 10.dp
+            else -> 8.dp
         }
 
         Column(
@@ -319,7 +472,7 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = GlanceTheme.colors.onBackground,
+                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
                     textAlign = TextAlign.Center
                 ),
                 maxLines = maxQuoteLines
@@ -329,11 +482,11 @@ class MotivaWidget : GlanceAppWidget() {
 
             // Author
             Text(
-                text = "- $author",
+                text = "— $author",
                 style = TextStyle(
                     fontSize = authorFontSize,
                     fontWeight = FontWeight.Medium,
-                    color = GlanceTheme.colors.secondary,
+                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
                     textAlign = TextAlign.Center
                 ),
                 maxLines = 1
