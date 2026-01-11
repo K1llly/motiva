@@ -16,8 +16,33 @@ import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/settings/presentation/screens/settings_screen.dart';
 
-class MotivaApp extends StatelessWidget {
+class MotivaApp extends StatefulWidget {
   const MotivaApp({super.key});
+
+  @override
+  State<MotivaApp> createState() => _MotivaAppState();
+}
+
+class _MotivaAppState extends State<MotivaApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    di.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached) {
+      di.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

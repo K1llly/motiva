@@ -1,11 +1,46 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../domain/entities/widget_settings.dart';
 
+// Cached painter instance to avoid repeated allocations
+const _patternPainter = _PatternPainter();
+
+// Cached border radius to avoid repeated allocations
+const _outerRadius = BorderRadius.all(Radius.circular(24));
+const _innerRadius = BorderRadius.all(Radius.circular(20));
+
+// Cached gradient for background
+final _backgroundGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [
+    Colors.blue.shade900,
+    Colors.purple.shade900,
+  ],
+);
+
+// Cached gradient for glass effect (simulated without BackdropFilter)
+final _glassGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [
+    Colors.white.withValues(alpha: 0.2),
+    Colors.white.withValues(alpha: 0.08),
+  ],
+);
+
 class WidgetPreview extends StatelessWidget {
   final WidgetSettings settings;
+  final bool forceDisableGlass;
+  final String? quoteText;
+  final String? author;
 
-  const WidgetPreview({super.key, required this.settings});
+  const WidgetPreview({
+    super.key,
+    required this.settings,
+    this.forceDisableGlass = false,
+    this.quoteText,
+    this.author,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,29 +57,22 @@ class WidgetPreview extends StatelessWidget {
             width: 300,
             height: 180,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.shade900,
-                  Colors.purple.shade900,
-                ],
-              ),
+              borderRadius: _outerRadius,
+              gradient: _backgroundGradient,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: _outerRadius,
               child: Stack(
                 children: [
-                  // Background pattern
-                  Positioned.fill(
+                  // Background pattern - uses cached painter
+                  const Positioned.fill(
                     child: CustomPaint(
-                      painter: _PatternPainter(),
+                      painter: _patternPainter,
                     ),
                   ),
                   // Widget content
                   Positioned.fill(
-                    child: settings.isGlassModeEnabled
+                    child: (settings.isGlassModeEnabled && !forceDisableGlass)
                         ? _buildGlassPreview(context)
                         : _buildSolidPreview(context),
                   ),
@@ -58,30 +86,19 @@ class WidgetPreview extends StatelessWidget {
   }
 
   Widget _buildGlassPreview(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.25),
-                Colors.white.withValues(alpha: 0.1),
-              ],
-            ),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1.5,
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: _buildQuoteContent(),
+    // Simulated glass effect without BackdropFilter to save GPU memory
+    // Simplified to avoid nested ClipRRect which causes IOSurface allocations
+    return Container(
+      margin: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        gradient: _glassGradient,
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1.5,
         ),
+        borderRadius: _innerRadius,
       ),
+      child: _buildQuoteContent(),
     );
   }
 
@@ -90,7 +107,7 @@ class WidgetPreview extends StatelessWidget {
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Color(settings.backgroundColor),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: _innerRadius,
       ),
       child: _buildQuoteContent(),
     );
@@ -100,13 +117,16 @@ class WidgetPreview extends StatelessWidget {
     final textColor = Color(settings.textColor);
     final secondaryTextColor = textColor.withValues(alpha: 0.7);
 
+    final displayQuote = quoteText ?? 'The happiness of your life depends upon the quality of your thoughts.';
+    final displayAuthor = author ?? 'Marcus Aurelius';
+
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            '"The happiness of your life depends upon the quality of your thoughts."',
+            '"$displayQuote"',
             style: TextStyle(
               color: textColor,
               fontSize: 14,
@@ -119,7 +139,7 @@ class WidgetPreview extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '— Marcus Aurelius',
+            '— $displayAuthor',
             style: TextStyle(
               color: secondaryTextColor,
               fontSize: 12,
@@ -133,18 +153,21 @@ class WidgetPreview extends StatelessWidget {
 }
 
 class _PatternPainter extends CustomPainter {
+  // Cached paint object - created once, reused on every paint call
+  static final Paint _paint = Paint()
+    ..color = Colors.white.withValues(alpha: 0.05)
+    ..style = PaintingStyle.fill;
+
+  const _PatternPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.05)
-      ..style = PaintingStyle.fill;
-
     for (var i = 0; i < 5; i++) {
       for (var j = 0; j < 5; j++) {
         canvas.drawCircle(
           Offset(size.width * (i / 4), size.height * (j / 4)),
           20,
-          paint,
+          _paint,
         );
       }
     }

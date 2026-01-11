@@ -21,6 +21,7 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.color.ColorProvider
+import androidx.glance.ImageProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -208,7 +209,8 @@ class MotivaWidget : GlanceAppWidget() {
     }
 
     /**
-     * Glass container with frosted glass effect
+     * Glass container with iOS 26-style frosted glass effect
+     * Uses drawable background with gradient overlay for glass appearance
      */
     @Composable
     private fun GlassContainer(
@@ -216,23 +218,14 @@ class MotivaWidget : GlanceAppWidget() {
         appearance: WidgetAppearance,
         content: @Composable () -> Unit
     ) {
-        // Main glass background with semi-transparent white
+        // Use drawable background for frosted glass effect
+        // The drawable contains layered gradients that simulate the frosted appearance
         Box(
             modifier = modifier
-                .background(ColorProvider(day = Color(0x40FFFFFF), night = Color(0x40FFFFFF))),
+                .background(ImageProvider(R.drawable.glass_frosted_background)),
             contentAlignment = Alignment.Center
         ) {
-            // Inner highlight layer for glass effect
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .padding(2.dp)
-                    .cornerRadius(18.dp)
-                    .background(ColorProvider(day = Color(0x15FFFFFF), night = Color(0x15FFFFFF))),
-                contentAlignment = Alignment.Center
-            ) {
-                content()
-            }
+            content()
         }
     }
 
@@ -384,14 +377,15 @@ class MotivaWidget : GlanceAppWidget() {
         // Add extra lines for long quotes
         val maxQuoteLines = if (quoteText.length > 150) baseMaxLines + 3 else baseMaxLines
 
-        Column(
+        // Use Box with stacked children - quote centered, author at bottom
+        Box(
             modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
+            contentAlignment = Alignment.Center
         ) {
-            // Quote text (main content)
+            // Quote text - centered in the box (ignoring author)
             Text(
                 text = "\"$quoteText\"",
+                modifier = GlanceModifier.fillMaxWidth(),
                 style = TextStyle(
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
@@ -402,19 +396,24 @@ class MotivaWidget : GlanceAppWidget() {
                 maxLines = maxQuoteLines
             )
 
-            Spacer(modifier = GlanceModifier.height(if (isTall) 16.dp else 8.dp))
-
-            // Author at bottom
-            Text(
-                text = "— $author",
-                style = TextStyle(
-                    fontSize = if (isTall) 13.sp else 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
-                    textAlign = TextAlign.Center
-                ),
-                maxLines = 1
-            )
+            // Author at bottom - positioned absolutely within the same Box
+            Column(
+                modifier = GlanceModifier.fillMaxSize(),
+                verticalAlignment = Alignment.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "— $author",
+                    modifier = GlanceModifier.padding(bottom = 4.dp),
+                    style = TextStyle(
+                        fontSize = if (isTall) 13.sp else 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
+                        textAlign = TextAlign.Center
+                    ),
+                    maxLines = 1
+                )
+            }
         }
     }
 
@@ -460,14 +459,15 @@ class MotivaWidget : GlanceAppWidget() {
             else -> 8.dp
         }
 
-        Column(
+        // Use Box with stacked children - quote centered, author at bottom
+        Box(
             modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
+            contentAlignment = Alignment.Center
         ) {
-            // Quote text
+            // Quote text - centered in the box (ignoring author)
             Text(
                 text = "\"$quoteText\"",
+                modifier = GlanceModifier.fillMaxWidth(),
                 style = TextStyle(
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
@@ -478,19 +478,24 @@ class MotivaWidget : GlanceAppWidget() {
                 maxLines = maxQuoteLines
             )
 
-            Spacer(modifier = GlanceModifier.height(spacing))
-
-            // Author
-            Text(
-                text = "— $author",
-                style = TextStyle(
-                    fontSize = authorFontSize,
-                    fontWeight = FontWeight.Medium,
-                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
-                    textAlign = TextAlign.Center
-                ),
-                maxLines = 1
-            )
+            // Author at bottom - positioned absolutely within the same Box
+            Column(
+                modifier = GlanceModifier.fillMaxSize(),
+                verticalAlignment = Alignment.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "— $author",
+                    modifier = GlanceModifier.padding(bottom = 4.dp),
+                    style = TextStyle(
+                        fontSize = authorFontSize,
+                        fontWeight = FontWeight.Medium,
+                        color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
+                        textAlign = TextAlign.Center
+                    ),
+                    maxLines = 1
+                )
+            }
         }
     }
 }

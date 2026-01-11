@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -7,6 +8,7 @@ import '../datasources/widget_datasource.dart';
 
 class WidgetRepositoryImpl implements WidgetRepository {
   final WidgetDataSource dataSource;
+  StreamSubscription<Uri?>? _widgetClickSubscription;
 
   WidgetRepositoryImpl({required this.dataSource});
 
@@ -34,7 +36,10 @@ class WidgetRepositoryImpl implements WidgetRepository {
   @override
   Future<Either<Failure, void>> registerWidgetCallback() async {
     try {
-      HomeWidget.widgetClicked.listen((uri) {
+      // Cancel any existing subscription before creating a new one
+      await _widgetClickSubscription?.cancel();
+
+      _widgetClickSubscription = HomeWidget.widgetClicked.listen((uri) {
         // Handle widget tap - could navigate to specific screen
         if (uri != null) {
           // Process deep link
@@ -66,5 +71,11 @@ class WidgetRepositoryImpl implements WidgetRepository {
     } catch (e) {
       return Left(WidgetFailure('Failed to refresh widget: ${e.toString()}'));
     }
+  }
+
+  /// Dispose resources - should be called when repository is no longer needed
+  Future<void> dispose() async {
+    await _widgetClickSubscription?.cancel();
+    _widgetClickSubscription = null;
   }
 }

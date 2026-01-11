@@ -10,4 +10,11 @@ import UIKit
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+
+  override func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
+    super.applicationDidReceiveMemoryWarning(application)
+
+    // Clear URL and image caches to free memory
+    URLCache.shared.removeAllCachedResponses()
+  }
 }

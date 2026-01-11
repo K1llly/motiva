@@ -25,10 +25,13 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
     final index = (dayNumber - 1) % shuffledOrder.length;
     final quoteNumber = shuffledOrder[index];
 
-    final quoteData = quoteBox.values.cast<Map>().firstWhere(
-          (q) => q['day_number'] == quoteNumber,
-          orElse: () => throw CacheException('Quote not found for day $quoteNumber'),
-        );
+    // Use direct key lookup instead of iterating all values (saves memory)
+    final quoteId = 'q${quoteNumber.toString().padLeft(3, '0')}';
+    final quoteData = quoteBox.get(quoteId);
+
+    if (quoteData == null) {
+      throw CacheException('Quote not found for day $quoteNumber');
+    }
 
     return QuoteModel.fromJson(Map<String, dynamic>.from(quoteData));
   }

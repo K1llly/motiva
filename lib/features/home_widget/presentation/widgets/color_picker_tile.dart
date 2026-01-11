@@ -172,18 +172,7 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
                           : Theme.of(context).dividerColor,
                       width: isSelected ? 3 : 1,
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            )
-                          ]
-                        : null,
+                    // Removed BoxShadow to save GPU memory
                   ),
                   child: isSelected
                       ? Icon(

@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../quote/presentation/bloc/quote_bloc.dart';
+import '../../../quote/presentation/bloc/quote_state.dart';
 import '../../domain/entities/widget_settings.dart';
 import '../bloc/widget_settings_bloc.dart';
 import '../bloc/widget_settings_event.dart';
@@ -18,11 +21,30 @@ class WidgetCustomizationScreen extends StatefulWidget {
 
 class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
   bool _wasSaving = false;
+  bool _isIOS26OrLater = false;
 
   @override
   void initState() {
     super.initState();
     context.read<WidgetSettingsBloc>().add(const LoadWidgetSettingsEvent());
+    _checkIOSVersion();
+  }
+
+  Future<void> _checkIOSVersion() async {
+    if (Platform.isIOS) {
+      // Get iOS version from operatingSystemVersion
+      // Format is like "Version 26.0 (Build 12345)" or "26.0"
+      final versionString = Platform.operatingSystemVersion;
+      final match = RegExp(r'(\d+)\.').firstMatch(versionString);
+      if (match != null) {
+        final majorVersion = int.tryParse(match.group(1) ?? '0') ?? 0;
+        if (majorVersion >= 26) {
+          setState(() {
+            _isIOS26OrLater = true;
+          });
+        }
+      }
+    }
   }
 
   @override
@@ -139,15 +161,32 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Widget Preview
-          WidgetPreview(settings: settings),
+          // Widget Preview (force disable glass on iOS 26+)
+          BlocBuilder<QuoteBloc, QuoteState>(
+            builder: (context, quoteState) {
+              String? quoteText;
+              String? author;
+              if (quoteState is QuoteLoaded) {
+                quoteText = quoteState.quote.text;
+                author = quoteState.quote.author;
+              }
+              return WidgetPreview(
+                settings: settings,
+                forceDisableGlass: _isIOS26OrLater,
+                quoteText: quoteText,
+                author: author,
+              );
+            },
+          ),
           const SizedBox(height: 32),
 
-          // Glass Mode Toggle
-          _buildGlassModeToggle(context, settings, isSaving, l10n),
-          const SizedBox(height: 16),
+          // Glass Mode Toggle (hidden on iOS 26+ due to known issues)
+          if (!_isIOS26OrLater) ...[
+            _buildGlassModeToggle(context, settings, isSaving, l10n),
+            const SizedBox(height: 16),
+          ],
 
-          // Background Color Picker (disabled when glass mode is on)
+          // Background Color Picker (disabled when glass mode is on, but not on iOS 26+)
           _buildBackgroundColorPicker(context, settings, isSaving, l10n),
           const SizedBox(height: 16),
 
@@ -229,14 +268,15 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
     bool isSaving,
     AppLocalizations l10n,
   ) {
-    final isDisabled = settings.isGlassModeEnabled || isSaving;
+    // On iOS 26+, glass mode is disabled, so background is always enabled
+    final isDisabled = !_isIOS26OrLater && (settings.isGlassModeEnabled || isSaving);
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: isDisabled ? 0.5 : 1.0,
       child: ColorPickerTile(
         title: l10n.backgroundColor,
-        subtitle: settings.isGlassModeEnabled
+        subtitle: settings.isGlassModeEnabled && !_isIOS26OrLater
             ? l10n.disabledWhenGlassOn
             : l10n.tapToChange,
         currentColor: Color(settings.backgroundColor),
@@ -268,4 +308,5 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
       },
     );
   }
+
 }

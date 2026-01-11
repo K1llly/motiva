@@ -75,12 +75,32 @@ Future<void> init() async {
   _initSettingsFeature();
 }
 
+/// Cleanup resources - call on app termination
+Future<void> dispose() async {
+  // Close Hive boxes to free memory
+  await Hive.close();
+
+  // Dispose widget repository subscription
+  final widgetRepo = sl<WidgetRepository>();
+  if (widgetRepo is WidgetRepositoryImpl) {
+    await widgetRepo.dispose();
+  }
+
+  // Reset GetIt
+  await sl.reset();
+}
+
 Future<void> _initExternal() async {
   // Hive
   await Hive.initFlutter();
   final quoteBox = await Hive.openBox<Map>(StorageKeys.quotesBox);
   final streakBox = await Hive.openBox<Map>(StorageKeys.streakBox);
   final userDataBox = await Hive.openBox<Map>(StorageKeys.userDataBox);
+
+  // Compact boxes to reduce memory footprint
+  await quoteBox.compact();
+  await streakBox.compact();
+  await userDataBox.compact();
 
   sl.registerLazySingleton<Box<Map>>(() => quoteBox, instanceName: 'quoteBox');
   sl.registerLazySingleton<Box<Map>>(() => streakBox,
