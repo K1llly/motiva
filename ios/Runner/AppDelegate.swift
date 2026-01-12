@@ -12,8 +12,6 @@ import UIKit
   }
 
   override func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
-    super.applicationDidReceiveMemoryWarning(application)
-
     // Clear URL and image caches to free memory
     URLCache.shared.removeAllCachedResponses()
   }

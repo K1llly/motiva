@@ -411,13 +411,9 @@ struct InlineWidgetView: View {
 struct MotivaWidget: Widget {
     let kind: String = "MotivaWidget"
 
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            MotivaWidgetEntryView(entry: entry)
-        }
-        .configurationDisplayName("Daily Quote")
-        .description("Your daily wisdom on your home screen")
-        .supportedFamilies([
+    private var supportedFamilies: [WidgetFamily] {
+        #if os(iOS)
+        return [
             .systemSmall,
             .systemMedium,
             .systemLarge,
@@ -425,7 +421,24 @@ struct MotivaWidget: Widget {
             .accessoryCircular,
             .accessoryRectangular,
             .accessoryInline
-        ])
+        ]
+        #else
+        return [
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            .systemExtraLarge
+        ]
+        #endif
+    }
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            MotivaWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Daily Quote")
+        .description("Your daily wisdom on your home screen")
+        .supportedFamilies(supportedFamilies)
         .contentMarginsDisabled()
     }
 }
