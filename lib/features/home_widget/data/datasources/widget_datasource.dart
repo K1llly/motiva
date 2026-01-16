@@ -10,6 +10,8 @@ abstract class WidgetDataSource {
   });
   Future<void> updateWidget();
   Future<DateTime?> getLastUpdateTime();
+  Future<void> syncShuffledOrder(List<int> shuffledOrder);
+  Future<void> syncStartDate(DateTime startDate);
 }
 
 class WidgetDataSourceImpl implements WidgetDataSource {
@@ -71,6 +73,37 @@ class WidgetDataSourceImpl implements WidgetDataSource {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  @override
+  Future<void> syncShuffledOrder(List<int> shuffledOrder) async {
+    try {
+      await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
+      // Convert to 0-indexed for Swift (Flutter uses 1-30, Swift needs 0-29)
+      // Serialize as comma-separated string since home_widget only supports primitives
+      final zeroIndexedOrder = shuffledOrder.map((i) => i - 1).toList();
+      final serialized = zeroIndexedOrder.join(',');
+      await HomeWidget.saveWidgetData<String>(
+        WidgetConstants.shuffledOrderKey,
+        serialized,
+      );
+    } catch (e) {
+      throw WidgetException('Failed to sync shuffled order: $e');
+    }
+  }
+
+  @override
+  Future<void> syncStartDate(DateTime startDate) async {
+    try {
+      await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
+      // Store as Unix timestamp (seconds since epoch)
+      await HomeWidget.saveWidgetData<double>(
+        WidgetConstants.startDateKey,
+        startDate.millisecondsSinceEpoch / 1000.0,
+      );
+    } catch (e) {
+      throw WidgetException('Failed to sync start date: $e');
     }
   }
 }

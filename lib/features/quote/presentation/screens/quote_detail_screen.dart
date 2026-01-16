@@ -11,6 +11,10 @@ class QuoteDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Cache theme references once to avoid repeated lookups
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,13 +35,13 @@ class QuoteDetailScreen extends StatelessWidget {
                     Icon(
                       Icons.format_quote,
                       size: 32,
-                      color: Theme.of(context).colorScheme.secondary,
+                      color: colorScheme.secondary,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       quote.text,
                       style: AppTypography.quoteStyle(context).copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: colorScheme.onSurface,
                         fontSize: 18,
                       ),
                       textAlign: TextAlign.center,
@@ -46,7 +50,7 @@ class QuoteDetailScreen extends StatelessWidget {
                     Text(
                       '- ${quote.author}',
                       style: AppTypography.authorStyle(context).copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
+                        color: colorScheme.secondary,
                       ),
                     ),
                   ],
@@ -58,14 +62,14 @@ class QuoteDetailScreen extends StatelessWidget {
             // Meaning section
             Text(
               l10n.whatThisMeans,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 16),
             Text(
               quote.meaning,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              style: textTheme.bodyLarge?.copyWith(
                     height: 1.6,
                   ),
             ),

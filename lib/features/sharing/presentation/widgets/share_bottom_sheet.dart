@@ -12,11 +12,15 @@ class ShareBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Cache theme references once
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final handleColor = colorScheme.onSurface.withValues(alpha: 0.2);
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -26,14 +30,14 @@ class ShareBottomSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+              color: handleColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             l10n.shareQuote,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -45,24 +49,28 @@ class ShareBottomSheet extends StatelessWidget {
                 icon: Icons.camera_alt,
                 label: l10n.instagram,
                 color: const Color(0xFFE4405F),
+                labelStyle: theme.textTheme.bodySmall,
                 onTap: () => _shareToInstagram(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.alternate_email,
                 label: l10n.twitter,
                 color: const Color(0xFF1DA1F2),
+                labelStyle: theme.textTheme.bodySmall,
                 onTap: () => _shareToTwitter(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.chat_bubble,
                 label: l10n.whatsapp,
                 color: const Color(0xFF25D366),
+                labelStyle: theme.textTheme.bodySmall,
                 onTap: () => _shareToWhatsApp(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.more_horiz,
                 label: l10n.more,
-                color: Theme.of(context).colorScheme.secondary,
+                color: colorScheme.secondary,
+                labelStyle: theme.textTheme.bodySmall,
                 onTap: () => _shareGeneric(context, l10n),
               ),
             ],
@@ -113,16 +121,21 @@ class _ShareOption extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final TextStyle? labelStyle;
 
   const _ShareOption({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
+    this.labelStyle,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Pre-compute background color once
+    final backgroundColor = color.withValues(alpha: 0.1);
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -132,7 +145,7 @@ class _ShareOption extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: backgroundColor,
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -144,7 +157,7 @@ class _ShareOption extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: labelStyle,
           ),
         ],
       ),

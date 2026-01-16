@@ -20,8 +20,8 @@ import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
-import androidx.glance.color.ColorProvider
 import androidx.glance.ImageProvider
+import androidx.glance.unit.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -44,13 +44,25 @@ import com.motiva.stoic_mind.R
 /**
  * Data class to hold widget appearance settings
  * Using Int color values for compatibility with Glance ColorProvider
+ * Includes cached ColorProviders to avoid repeated allocations
  */
 data class WidgetAppearance(
     val backgroundColor: Int,
     val textColor: Int,
     val secondaryTextColor: Int,
     val isGlassMode: Boolean
-)
+) {
+    // Cached ColorProviders to avoid repeated allocations in composables
+    val backgroundColorProvider: ColorProvider by lazy {
+        ColorProvider(Color(backgroundColor))
+    }
+    val textColorProvider: ColorProvider by lazy {
+        ColorProvider(Color(textColor))
+    }
+    val secondaryTextColorProvider: ColorProvider by lazy {
+        ColorProvider(Color(secondaryTextColor))
+    }
+}
 
 class MotivaWidget : GlanceAppWidget() {
 
@@ -183,11 +195,11 @@ class MotivaWidget : GlanceAppWidget() {
                     )
                 }
             } else {
-                // Solid color background
+                // Solid color background - use cached ColorProvider
                 Box(
                     modifier = GlanceModifier
                         .fillMaxSize()
-                        .background(ColorProvider(day = Color(appearance.backgroundColor), night = Color(appearance.backgroundColor)))
+                        .background(appearance.backgroundColorProvider)
                         .cornerRadius(20.dp)
                         .clickable(actionRunCallback<OpenAppAction>())
                         .padding(padding),
@@ -279,7 +291,7 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
+                    color = appearance.textColorProvider,
                     textAlign = TextAlign.Start
                 ),
                 maxLines = maxLines
@@ -294,7 +306,7 @@ class MotivaWidget : GlanceAppWidget() {
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
+                    color = appearance.secondaryTextColorProvider,
                     textAlign = TextAlign.End
                 ),
                 maxLines = 1
@@ -332,7 +344,7 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
+                    color = appearance.textColorProvider,
                     textAlign = TextAlign.Start
                 ),
                 maxLines = maxLines
@@ -345,7 +357,7 @@ class MotivaWidget : GlanceAppWidget() {
                 style = TextStyle(
                     fontSize = if (isVerySmall) 12.sp else 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
+                    color = appearance.secondaryTextColorProvider,
                     textAlign = TextAlign.Start
                 ),
                 maxLines = 1
@@ -390,7 +402,7 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
+                    color = appearance.textColorProvider,
                     textAlign = TextAlign.Center
                 ),
                 maxLines = maxQuoteLines
@@ -408,7 +420,7 @@ class MotivaWidget : GlanceAppWidget() {
                     style = TextStyle(
                         fontSize = if (isTall) 13.sp else 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
+                        color = appearance.secondaryTextColorProvider,
                         textAlign = TextAlign.Center
                     ),
                     maxLines = 1
@@ -472,7 +484,7 @@ class MotivaWidget : GlanceAppWidget() {
                     fontSize = quoteFontSize,
                     fontWeight = FontWeight.Normal,
                     fontStyle = FontStyle.Italic,
-                    color = ColorProvider(day = Color(appearance.textColor), night = Color(appearance.textColor)),
+                    color = appearance.textColorProvider,
                     textAlign = TextAlign.Center
                 ),
                 maxLines = maxQuoteLines
@@ -490,7 +502,7 @@ class MotivaWidget : GlanceAppWidget() {
                     style = TextStyle(
                         fontSize = authorFontSize,
                         fontWeight = FontWeight.Medium,
-                        color = ColorProvider(day = Color(appearance.secondaryTextColor), night = Color(appearance.secondaryTextColor)),
+                        color = appearance.secondaryTextColorProvider,
                         textAlign = TextAlign.Center
                     ),
                     maxLines = 1

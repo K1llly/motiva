@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'di/injection_container.dart' as di;
 import 'core/data/quotes_data.dart';
+import 'core/constants/storage_keys.dart';
 import 'features/quote/data/datasources/quote_local_datasource.dart';
 import 'features/quote/data/models/quote_model.dart';
 import 'features/quote/domain/entities/quote.dart';
+import 'features/home_widget/data/datasources/widget_datasource.dart';
 import 'features/home_widget/domain/usecases/update_widget_data.dart';
 import 'features/quote/domain/usecases/get_daily_quote.dart';
 import 'features/notifications/presentation/services/notification_service.dart';
@@ -55,15 +58,38 @@ Future<void> _initializeWidgetAndNotifications() async {
       (quote) => todayQuote = quote,
     );
 
-    // Update widget with the loaded quote
+    // Sync widget data for independent quote calculation
+    await _syncWidgetData();
+
+    // Run widget update and notification init (both have internal error handling)
     if (todayQuote != null) {
       await _updateWidget(todayQuote!, dayNumber);
     }
-
-    // Initialize notifications with the same quote
     await _initializeNotifications(todayQuote);
   } catch (e) {
     debugPrint('Initialization error: $e');
+  }
+}
+
+/// Sync start date and shuffled order to widget for independent quote calculation
+Future<void> _syncWidgetData() async {
+  try {
+    final prefs = di.sl<SharedPreferences>();
+    final quoteDataSource = di.sl<QuoteLocalDataSource>();
+    final widgetDataSource = di.sl<WidgetDataSource>();
+
+    // Sync start date (install date)
+    final installDateStr = prefs.getString(StorageKeys.installDate);
+    if (installDateStr != null) {
+      final installDate = DateTime.parse(installDateStr);
+      await widgetDataSource.syncStartDate(installDate);
+    }
+
+    // Sync shuffled order
+    final shuffledOrder = await quoteDataSource.getShuffledOrder();
+    await widgetDataSource.syncShuffledOrder(shuffledOrder);
+  } catch (e) {
+    debugPrint('Widget data sync error: $e');
   }
 }
 

@@ -14,20 +14,19 @@ class WidgetSettingsDataSourceImpl implements WidgetSettingsDataSource {
     try {
       await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
 
+      // Fetch settings sequentially to avoid Future.wait failure propagation
       final backgroundColor = await HomeWidget.getWidgetData<int>(
-        WidgetConstants.backgroundColorKey,
-      );
+          WidgetConstants.backgroundColorKey);
       final textColor = await HomeWidget.getWidgetData<int>(
-        WidgetConstants.textColorKey,
-      );
+          WidgetConstants.textColorKey);
       final glassMode = await HomeWidget.getWidgetData<bool>(
-        WidgetConstants.glassModeKey,
-      );
+          WidgetConstants.glassModeKey);
 
       return WidgetSettings(
         backgroundColor:
             backgroundColor ?? WidgetSettings.defaultSettings.backgroundColor,
-        textColor: textColor ?? WidgetSettings.defaultSettings.textColor,
+        textColor:
+            textColor ?? WidgetSettings.defaultSettings.textColor,
         isGlassModeEnabled:
             glassMode ?? WidgetSettings.defaultSettings.isGlassModeEnabled,
       );

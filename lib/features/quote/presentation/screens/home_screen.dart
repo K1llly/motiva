@@ -27,11 +27,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    // Future-proof: add any controller/subscription cleanup here
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(l10n.appTitle),
         centerTitle: true,
@@ -169,6 +174,8 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Cache theme references once
+    final theme = Theme.of(context);
 
     return Center(
       child: Padding(
@@ -179,13 +186,13 @@ class _ErrorView extends StatelessWidget {
             Icon(
               Icons.error_outline,
               size: 64,
-              color: Theme.of(context).colorScheme.error,
+              color: theme.colorScheme.error,
             ),
             const SizedBox(height: 16),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 24),
             ElevatedButton(

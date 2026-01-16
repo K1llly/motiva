@@ -97,11 +97,7 @@ Future<void> _initExternal() async {
   final streakBox = await Hive.openBox<Map>(StorageKeys.streakBox);
   final userDataBox = await Hive.openBox<Map>(StorageKeys.userDataBox);
 
-  // Compact boxes to reduce memory footprint
-  await quoteBox.compact();
-  await streakBox.compact();
-  await userDataBox.compact();
-
+  // Register boxes immediately for fast startup
   sl.registerLazySingleton<Box<Map>>(() => quoteBox, instanceName: 'quoteBox');
   sl.registerLazySingleton<Box<Map>>(() => streakBox,
       instanceName: 'streakBox');
@@ -111,6 +107,18 @@ Future<void> _initExternal() async {
   // SharedPreferences
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => prefs);
+
+  // Compact boxes in background after app is fully initialized
+  // Use delayed instead of microtask to avoid race conditions with Hive reads
+  Future.delayed(const Duration(seconds: 5), () async {
+    try {
+      await quoteBox.compact();
+      await streakBox.compact();
+      await userDataBox.compact();
+    } catch (_) {
+      // Ignore compaction errors - not critical for app function
+    }
+  });
 }
 
 void _initCore() {

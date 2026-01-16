@@ -19,6 +19,8 @@ class ColorPickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dividerColor = Theme.of(context).dividerColor;
+
     return Card(
       child: ListTile(
         leading: Container(
@@ -27,9 +29,7 @@ class ColorPickerTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: currentColor,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context).dividerColor,
-            ),
+            border: Border.all(color: dividerColor),
           ),
         ),
         title: Text(title),
@@ -114,6 +114,11 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
     Color(0xFFFFFFFF), // White
   ];
 
+  // Pre-computed luminance cache to avoid calculating in itemBuilder
+  static final Map<Color, bool> _isLightColor = {
+    for (final color in _presetColors) color: color.computeLuminance() > 0.5
+  };
+
   @override
   void initState() {
     super.initState();
@@ -123,6 +128,10 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Cache theme references once
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final dividerColor = theme.dividerColor;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -134,7 +143,7 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
             children: [
               Text(
                 l10n.selectColor,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: theme.textTheme.titleLarge,
               ),
               const Spacer(),
               IconButton(
@@ -167,17 +176,15 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
                     color: color,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).dividerColor,
+                      color: isSelected ? primaryColor : dividerColor,
                       width: isSelected ? 3 : 1,
                     ),
-                    // Removed BoxShadow to save GPU memory
                   ),
                   child: isSelected
                       ? Icon(
                           Icons.check,
-                          color: color.computeLuminance() > 0.5
+                          // Use cached luminance instead of computing per item
+                          color: _isLightColor[color]!
                               ? Colors.black
                               : Colors.white,
                         )

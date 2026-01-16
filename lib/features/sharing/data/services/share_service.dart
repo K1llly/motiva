@@ -1,5 +1,4 @@
 import 'package:share_plus/share_plus.dart';
-import '../../../../core/utils/share_utils.dart';
 
 class ShareService {
   Future<void> shareText(String text) async {

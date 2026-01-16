@@ -11,6 +11,9 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
   final Box<Map> quoteBox;
   final SharedPreferences prefs;
 
+  // Memory cache for shuffled order to avoid repeated string-to-int parsing
+  List<int>? _shuffledOrderCache;
+
   QuoteLocalDataSourceImpl({
     required this.quoteBox,
     required this.prefs,
@@ -37,16 +40,27 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
   }
 
   /// Get existing shuffled order or create a new one
+  /// Uses memory cache to avoid repeated string-to-int parsing
   Future<List<int>> _getOrCreateShuffledOrder() async {
+    // Return cached order if available
+    if (_shuffledOrderCache != null) {
+      return _shuffledOrderCache!;
+    }
+
     final savedOrder = prefs.getStringList(StorageKeys.shuffledQuoteOrder);
 
     if (savedOrder != null && savedOrder.isNotEmpty) {
-      return savedOrder.map((s) => int.parse(s)).toList();
+      // Parse and cache the order
+      _shuffledOrderCache = savedOrder.map((s) => int.parse(s)).toList();
+      return _shuffledOrderCache!;
     }
 
     // Create new shuffled order unique to this user
     final order = List<int>.generate(AppConstants.totalQuotes, (i) => i + 1);
     order.shuffle(Random());
+
+    // Cache it
+    _shuffledOrderCache = order;
 
     // Save for persistence
     await prefs.setStringList(
@@ -54,7 +68,7 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
       order.map((i) => i.toString()).toList(),
     );
 
-    return order;
+    return _shuffledOrderCache!;
   }
 
   @override
@@ -95,5 +109,10 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
   @override
   Future<bool> hasQuotes() async {
     return quoteBox.isNotEmpty;
+  }
+
+  @override
+  Future<List<int>> getShuffledOrder() async {
+    return _getOrCreateShuffledOrder();
   }
 }

@@ -9,12 +9,16 @@ class QuoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Cache theme references once to avoid repeated lookups
+    final colorScheme = Theme.of(context).colorScheme;
+    final secondaryColor = colorScheme.secondary;
+
     return Card(
       elevation: 0, // Reduced to save GPU memory (IOSurface)
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant,
+          color: colorScheme.outlineVariant,
           width: 1,
         ),
       ),
@@ -26,13 +30,13 @@ class QuoteCard extends StatelessWidget {
             Icon(
               Icons.format_quote,
               size: 40,
-              color: Theme.of(context).colorScheme.secondary,
+              color: secondaryColor,
             ),
             const SizedBox(height: 24),
             Text(
               quote.text,
               style: AppTypography.quoteStyle(context).copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+                color: colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -43,20 +47,20 @@ class QuoteCard extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 2,
-                  color: Theme.of(context).colorScheme.secondary,
+                  color: secondaryColor,
                 ),
                 const SizedBox(width: 16),
                 Text(
                   quote.author,
                   style: AppTypography.authorStyle(context).copyWith(
-                    color: Theme.of(context).colorScheme.secondary,
+                    color: secondaryColor,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Container(
                   width: 40,
                   height: 2,
-                  color: Theme.of(context).colorScheme.secondary,
+                  color: secondaryColor,
                 ),
               ],
             ),

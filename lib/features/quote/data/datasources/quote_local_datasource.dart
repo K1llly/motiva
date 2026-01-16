@@ -21,4 +21,7 @@ abstract class QuoteLocalDataSource {
 
   /// Check if quotes are loaded
   Future<bool> hasQuotes();
+
+  /// Get the shuffled quote order for this user
+  Future<List<int>> getShuffledOrder();
 }

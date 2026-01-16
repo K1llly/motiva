@@ -1,37 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Base semi-transparent layer -->
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="#40FFFFFF" />
-            <corners android:radius="20dp" />
-        </shape>
-    </item>
-
-    <!-- Subtle gradient for depth (top-left highlight) -->
-    <item>
-        <shape android:shape="rectangle">
-            <gradient
-                android:type="linear"
-                android:angle="135"
-                android:startColor="#25FFFFFF"
-                android:centerColor="#10FFFFFF"
-                android:endColor="#05FFFFFF" />
-            <corners android:radius="20dp" />
-        </shape>
-    </item>
-
-    <!-- Inner border glow effect -->
-    <item
-        android:left="1dp"
-        android:top="1dp"
-        android:right="1dp"
-        android:bottom="1dp">
-        <shape android:shape="rectangle">
-            <stroke
-                android:width="0.5dp"
-                android:color="#30FFFFFF" />
-            <corners android:radius="19dp" />
-        </shape>
-    </item>
-</layer-list>
+<!-- Simplified glass background: reduced from 3 layers to 1 for better GPU performance -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="linear"
+        android:angle="135"
+        android:startColor="#50FFFFFF"
+        android:centerColor="#30FFFFFF"
+        android:endColor="#20FFFFFF" />
+    <corners android:radius="20dp" />
+    <stroke
+        android:width="0.5dp"
+        android:color="#30FFFFFF" />
+</shape>

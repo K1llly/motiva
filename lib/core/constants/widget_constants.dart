@@ -19,4 +19,8 @@ class WidgetConstants {
   static const String backgroundColorKey = 'widget_background_color';
   static const String textColorKey = 'widget_text_color';
   static const String glassModeKey = 'widget_glass_mode';
+
+  /// Widget sync keys (for independent quote calculation)
+  static const String startDateKey = 'widget_start_date';
+  static const String shuffledOrderKey = 'widget_shuffled_order';
 }

@@ -97,10 +97,11 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
           }
           if (state is WidgetSettingsError) {
             _wasSaving = false;
+            final errorColor = Theme.of(context).colorScheme.error;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
+                backgroundColor: errorColor,
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -112,6 +113,7 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
           }
 
           if (state is WidgetSettingsError) {
+            final errorColor = Theme.of(context).colorScheme.error;
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -119,7 +121,7 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
                   Icon(
                     Icons.error_outline,
                     size: 48,
-                    color: Theme.of(context).colorScheme.error,
+                    color: errorColor,
                   ),
                   const SizedBox(height: 16),
                   Text(state.message),
@@ -196,31 +198,32 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
           const SizedBox(height: 32),
 
           // Info text
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest
-                  .withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.widgetInfoMessage,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+          _buildInfoBox(context, l10n),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoBox(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final onSurfaceVariant = colorScheme.onSurfaceVariant;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: onSurfaceVariant),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              l10n.widgetInfoMessage,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: onSurfaceVariant,
                   ),
-                ),
-              ],
             ),
           ),
         ],
@@ -234,6 +237,8 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
     bool isSaving,
     AppLocalizations l10n,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       child: SwitchListTile(
         title: Text(l10n.frostedGlassEffect),
@@ -247,15 +252,12 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
         secondary: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .primaryContainer
-                .withValues(alpha: 0.5),
+            color: colorScheme.primaryContainer.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             Icons.blur_on,
-            color: Theme.of(context).colorScheme.primary,
+            color: colorScheme.primary,
           ),
         ),
       ),
