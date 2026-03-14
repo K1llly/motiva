@@ -12,15 +12,17 @@ class WidgetSettingsDataSourceImpl implements WidgetSettingsDataSource {
   @override
   Future<WidgetSettings> getSettings() async {
     try {
-      await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
+      final results = await Future.wait<Object?>([
+        HomeWidget.getWidgetData<int>(WidgetConstants.backgroundColorKey),
+        HomeWidget.getWidgetData<int>(WidgetConstants.textColorKey),
+        HomeWidget.getWidgetData<bool>(WidgetConstants.glassModeKey),
+        HomeWidget.getWidgetData<String>(WidgetConstants.widgetFontKey),
+      ], eagerError: false);
 
-      // Fetch settings sequentially to avoid Future.wait failure propagation
-      final backgroundColor = await HomeWidget.getWidgetData<int>(
-          WidgetConstants.backgroundColorKey);
-      final textColor = await HomeWidget.getWidgetData<int>(
-          WidgetConstants.textColorKey);
-      final glassMode = await HomeWidget.getWidgetData<bool>(
-          WidgetConstants.glassModeKey);
+      final backgroundColor = results[0] as int?;
+      final textColor = results[1] as int?;
+      final glassMode = results[2] as bool?;
+      final fontKey = results[3] as String?;
 
       return WidgetSettings(
         backgroundColor:
@@ -29,6 +31,7 @@ class WidgetSettingsDataSourceImpl implements WidgetSettingsDataSource {
             textColor ?? WidgetSettings.defaultSettings.textColor,
         isGlassModeEnabled:
             glassMode ?? WidgetSettings.defaultSettings.isGlassModeEnabled,
+        fontKey: fontKey ?? WidgetSettings.defaultSettings.fontKey,
       );
     } catch (e) {
       throw WidgetException('Failed to load widget settings: $e');
@@ -38,8 +41,6 @@ class WidgetSettingsDataSourceImpl implements WidgetSettingsDataSource {
   @override
   Future<void> saveSettings(WidgetSettings settings) async {
     try {
-      await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
-
       await Future.wait([
         HomeWidget.saveWidgetData<int>(
           WidgetConstants.backgroundColorKey,
@@ -52,6 +53,10 @@ class WidgetSettingsDataSourceImpl implements WidgetSettingsDataSource {
         HomeWidget.saveWidgetData<bool>(
           WidgetConstants.glassModeKey,
           settings.isGlassModeEnabled,
+        ),
+        HomeWidget.saveWidgetData<String>(
+          WidgetConstants.widgetFontKey,
+          settings.fontKey,
         ),
       ]);
     } catch (e) {

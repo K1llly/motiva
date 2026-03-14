@@ -5,10 +5,19 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
+import 'app_localizations_pt.dart';
 import 'app_localizations_ru.dart';
 import 'app_localizations_tr.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,10 +105,19 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
     Locale('de'),
     Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('hi'),
+    Locale('it'),
+    Locale('ja'),
+    Locale('ko'),
+    Locale('pt'),
     Locale('ru'),
-    Locale('tr')
+    Locale('tr'),
+    Locale('zh')
   ];
 
   /// The app title displayed in the app bar
@@ -282,11 +300,227 @@ abstract class AppLocalizations {
   /// **'Русский'**
   String get russian;
 
+  /// Spanish language name
+  ///
+  /// In en, this message translates to:
+  /// **'Español'**
+  String get spanish;
+
+  /// French language name
+  ///
+  /// In en, this message translates to:
+  /// **'Français'**
+  String get french;
+
+  /// Portuguese language name
+  ///
+  /// In en, this message translates to:
+  /// **'Português'**
+  String get portuguese;
+
+  /// Italian language name
+  ///
+  /// In en, this message translates to:
+  /// **'Italiano'**
+  String get italian;
+
+  /// Arabic language name
+  ///
+  /// In en, this message translates to:
+  /// **'العربية'**
+  String get arabic;
+
+  /// Chinese language name
+  ///
+  /// In en, this message translates to:
+  /// **'中文'**
+  String get chinese;
+
+  /// Japanese language name
+  ///
+  /// In en, this message translates to:
+  /// **'日本語'**
+  String get japanese;
+
+  /// Korean language name
+  ///
+  /// In en, this message translates to:
+  /// **'한국어'**
+  String get korean;
+
+  /// Hindi language name
+  ///
+  /// In en, this message translates to:
+  /// **'हिन्दी'**
+  String get hindi;
+
   /// Subject text when sharing a quote
   ///
   /// In en, this message translates to:
   /// **'Daily Stoic Quote'**
   String get dailyStoicQuote;
+
+  /// Languages tab title
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get languages;
+
+  /// Notifications tab title
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// Appearance tab title
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// Toggle label for enabling notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications'**
+  String get enableNotifications;
+
+  /// Label for notification time picker
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Time'**
+  String get notificationTime;
+
+  /// Section title for daily notification settings
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Reminder'**
+  String get dailyReminder;
+
+  /// Subtitle for notification toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Receive a stoic quote every day'**
+  String get receiveQuoteDaily;
+
+  /// Section title for theme settings
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get themeMode;
+
+  /// System theme option
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemTheme;
+
+  /// Light theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightTheme;
+
+  /// Dark theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkTheme;
+
+  /// Onboarding page 1 title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Motiva'**
+  String get onboardingWelcomeTitle;
+
+  /// Onboarding page 1 description
+  ///
+  /// In en, this message translates to:
+  /// **'Your daily source of stoic wisdom to inspire and guide you through life\'s journey.'**
+  String get onboardingWelcomeDescription;
+
+  /// Onboarding page 2 title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Language'**
+  String get onboardingLanguageTitle;
+
+  /// Onboarding page 2 description
+  ///
+  /// In en, this message translates to:
+  /// **'Select your preferred language for quotes and the app interface.'**
+  String get onboardingLanguageDescription;
+
+  /// Onboarding page 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re All Set!'**
+  String get onboardingReadyTitle;
+
+  /// Onboarding page 3 description
+  ///
+  /// In en, this message translates to:
+  /// **'Start receiving daily stoic quotes to inspire your journey.'**
+  String get onboardingReadyDescription;
+
+  /// Onboarding get started button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Your Journey'**
+  String get onboardingGetStarted;
+
+  /// Onboarding next button text
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// Favorites screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favorites;
+
+  /// Empty favorites title
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites yet'**
+  String get noFavorites;
+
+  /// Empty favorites description
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart icon on a quote to save it here.'**
+  String get noFavoritesDescription;
+
+  /// Snackbar message when a quote is favorited
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get addedToFavorites;
+
+  /// Snackbar message when a quote is unfavorited
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get removedFromFavorites;
+
+  /// Font section title in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Font'**
+  String get font;
+
+  /// Widget font picker title
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Font'**
+  String get widgetFont;
+
+  /// Font picker sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Font'**
+  String get selectFont;
 }
 
 class _AppLocalizationsDelegate
@@ -299,8 +533,21 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['de', 'en', 'ru', 'tr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+        'ar',
+        'de',
+        'en',
+        'es',
+        'fr',
+        'hi',
+        'it',
+        'ja',
+        'ko',
+        'pt',
+        'ru',
+        'tr',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -309,14 +556,32 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
     case 'de':
       return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'hi':
+      return AppLocalizationsHi();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
+    case 'pt':
+      return AppLocalizationsPt();
     case 'ru':
       return AppLocalizationsRu();
     case 'tr':
       return AppLocalizationsTr();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

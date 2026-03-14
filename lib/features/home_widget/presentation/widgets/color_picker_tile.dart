@@ -67,6 +67,7 @@ class _ColorPickerSheet extends StatefulWidget {
 }
 
 class _ColorPickerSheetState extends State<_ColorPickerSheet> {
+  static const BorderRadius _tileRadius = BorderRadius.all(Radius.circular(12));
   late Color _selectedColor;
 
   // Masculine, stoic-themed color palette
@@ -105,6 +106,20 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
     Color(0xFF2D4A32), // Hunter green
     Color(0xFF3D5C45), // Sage dark
     Color(0xFF2E4A3E), // Evergreen
+
+    // Deep purples
+    Color(0xFF0D0015), // Void purple
+    Color(0xFF1A0033), // Dark plum
+    Color(0xFF2D1B4E), // Deep violet
+    Color(0xFF4A2D6B), // Muted purple
+    Color(0xFF3C1F5C), // Dusk purple
+
+    // Dark pinks & mauves
+    Color(0xFF1F0A14), // Black rose
+    Color(0xFF3D1028), // Dark magenta
+    Color(0xFF5C1A3D), // Deep berry
+    Color(0xFF6B3A5C), // Muted mauve
+    Color(0xFF4A2038), // Plum wine
 
     // Accent metallics
     Color(0xFFC9A227), // Antique gold
@@ -157,7 +172,7 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
+              crossAxisCount: 5,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),
@@ -170,11 +185,10 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
                 onTap: () {
                   setState(() => _selectedColor = color);
                 },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                child: Container(
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: _tileRadius,
                     border: Border.all(
                       color: isSelected ? primaryColor : dividerColor,
                       width: isSelected ? 3 : 1,

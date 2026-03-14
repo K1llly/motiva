@@ -151,8 +151,188 @@
     "description": "Russian language name"
   },
 
+  "spanish": "Español",
+  "@spanish": {
+    "description": "Spanish language name"
+  },
+
+  "french": "Français",
+  "@french": {
+    "description": "French language name"
+  },
+
+  "portuguese": "Português",
+  "@portuguese": {
+    "description": "Portuguese language name"
+  },
+
+  "italian": "Italiano",
+  "@italian": {
+    "description": "Italian language name"
+  },
+
+  "arabic": "العربية",
+  "@arabic": {
+    "description": "Arabic language name"
+  },
+
+  "chinese": "中文",
+  "@chinese": {
+    "description": "Chinese language name"
+  },
+
+  "japanese": "日本語",
+  "@japanese": {
+    "description": "Japanese language name"
+  },
+
+  "korean": "한국어",
+  "@korean": {
+    "description": "Korean language name"
+  },
+
+  "hindi": "हिन्दी",
+  "@hindi": {
+    "description": "Hindi language name"
+  },
+
   "dailyStoicQuote": "Daily Stoic Quote",
   "@dailyStoicQuote": {
     "description": "Subject text when sharing a quote"
+  },
+
+  "languages": "Languages",
+  "@languages": {
+    "description": "Languages tab title"
+  },
+
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications tab title"
+  },
+
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Appearance tab title"
+  },
+
+  "enableNotifications": "Enable Notifications",
+  "@enableNotifications": {
+    "description": "Toggle label for enabling notifications"
+  },
+
+  "notificationTime": "Notification Time",
+  "@notificationTime": {
+    "description": "Label for notification time picker"
+  },
+
+  "dailyReminder": "Daily Reminder",
+  "@dailyReminder": {
+    "description": "Section title for daily notification settings"
+  },
+
+  "receiveQuoteDaily": "Receive a stoic quote every day",
+  "@receiveQuoteDaily": {
+    "description": "Subtitle for notification toggle"
+  },
+
+  "themeMode": "Theme",
+  "@themeMode": {
+    "description": "Section title for theme settings"
+  },
+
+  "systemTheme": "System",
+  "@systemTheme": {
+    "description": "System theme option"
+  },
+
+  "lightTheme": "Light",
+  "@lightTheme": {
+    "description": "Light theme option"
+  },
+
+  "darkTheme": "Dark",
+  "@darkTheme": {
+    "description": "Dark theme option"
+  },
+
+  "onboardingWelcomeTitle": "Welcome to Motiva",
+  "@onboardingWelcomeTitle": {
+    "description": "Onboarding page 1 title"
+  },
+
+  "onboardingWelcomeDescription": "Your daily source of stoic wisdom to inspire and guide you through life's journey.",
+  "@onboardingWelcomeDescription": {
+    "description": "Onboarding page 1 description"
+  },
+
+  "onboardingLanguageTitle": "Choose Your Language",
+  "@onboardingLanguageTitle": {
+    "description": "Onboarding page 2 title"
+  },
+
+  "onboardingLanguageDescription": "Select your preferred language for quotes and the app interface.",
+  "@onboardingLanguageDescription": {
+    "description": "Onboarding page 2 description"
+  },
+
+  "onboardingReadyTitle": "You're All Set!",
+  "@onboardingReadyTitle": {
+    "description": "Onboarding page 3 title"
+  },
+
+  "onboardingReadyDescription": "Start receiving daily stoic quotes to inspire your journey.",
+  "@onboardingReadyDescription": {
+    "description": "Onboarding page 3 description"
+  },
+
+  "onboardingGetStarted": "Start Your Journey",
+  "@onboardingGetStarted": {
+    "description": "Onboarding get started button text"
+  },
+
+  "onboardingNext": "Next",
+  "@onboardingNext": {
+    "description": "Onboarding next button text"
+  },
+
+  "favorites": "Favorites",
+  "@favorites": {
+    "description": "Favorites screen title"
+  },
+
+  "noFavorites": "No favorites yet",
+  "@noFavorites": {
+    "description": "Empty favorites title"
+  },
+
+  "noFavoritesDescription": "Tap the heart icon on a quote to save it here.",
+  "@noFavoritesDescription": {
+    "description": "Empty favorites description"
+  },
+
+  "addedToFavorites": "Added to favorites",
+  "@addedToFavorites": {
+    "description": "Snackbar message when a quote is favorited"
+  },
+
+  "removedFromFavorites": "Removed from favorites",
+  "@removedFromFavorites": {
+    "description": "Snackbar message when a quote is unfavorited"
+  },
+
+  "font": "Font",
+  "@font": {
+    "description": "Font section title in settings"
+  },
+
+  "widgetFont": "Widget Font",
+  "@widgetFont": {
+    "description": "Widget font picker title"
+  },
+
+  "selectFont": "Select Font",
+  "@selectFont": {
+    "description": "Font picker sheet title"
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_font.dart';
 import '../../domain/entities/widget_settings.dart';
 
 // Cached painter instance to avoid repeated allocations
@@ -116,6 +117,7 @@ class WidgetPreview extends StatelessWidget {
   Widget _buildQuoteContent() {
     final textColor = Color(settings.textColor);
     final secondaryTextColor = textColor.withValues(alpha: 0.7);
+    final font = AppFont.fromKey(settings.fontKey);
 
     final displayQuote = quoteText ?? 'The happiness of your life depends upon the quality of your thoughts.';
     final displayAuthor = author ?? 'Marcus Aurelius';
@@ -127,7 +129,7 @@ class WidgetPreview extends StatelessWidget {
         children: [
           Text(
             '"$displayQuote"',
-            style: TextStyle(
+            style: font.primaryStyle.copyWith(
               color: textColor,
               fontSize: 14,
               fontStyle: FontStyle.italic,
@@ -140,7 +142,7 @@ class WidgetPreview extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             '— $displayAuthor',
-            style: TextStyle(
+            style: font.bodyStyle.copyWith(
               color: secondaryTextColor,
               fontSize: 12,
               fontWeight: FontWeight.w500,

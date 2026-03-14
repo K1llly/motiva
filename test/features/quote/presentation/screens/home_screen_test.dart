@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stoic_mind/features/quote/domain/entities/quote.dart';
@@ -12,6 +13,7 @@ import 'package:stoic_mind/features/streak/domain/entities/streak.dart';
 import 'package:stoic_mind/features/streak/presentation/bloc/streak_bloc.dart';
 import 'package:stoic_mind/features/streak/presentation/bloc/streak_event.dart';
 import 'package:stoic_mind/features/streak/presentation/bloc/streak_state.dart';
+import 'package:stoic_mind/l10n/app_localizations.dart';
 
 class MockQuoteBloc extends MockBloc<QuoteEvent, QuoteState>
     implements QuoteBloc {}
@@ -46,6 +48,13 @@ void main() {
 
   Widget createWidgetUnderTest() {
     return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       routes: {
         '/quote-detail': (context) => const Scaffold(body: Text('Detail Screen')),
       },

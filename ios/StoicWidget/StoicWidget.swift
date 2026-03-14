@@ -64,20 +64,9 @@ extension View {
     @ViewBuilder
     func widgetBackground(isGlassMode: Bool, backgroundColor: Color, renderingMode: WidgetRenderingMode) -> some View {
         self.containerBackground(for: .widget) {
-            if #available(iOS 26, *) {
-                // iOS 26: Glass mode has known issues, always use solid background
-                // System handles Liquid Glass automatically based on user's Display settings
-                backgroundColor
-            } else {
-                // iOS 17-18: Glass mode works with materials
-                if isGlassMode {
-                    Rectangle()
-                        .fill(.thinMaterial)
-                } else {
-                    backgroundColor
-                }
-            }
+            backgroundColor
         }
+        .widgetAccentable()
     }
 }
 
@@ -122,6 +111,7 @@ struct QuoteEntry: TimelineEntry {
     let backgroundColor: Color
     let textColor: Color
     let isGlassMode: Bool
+    let fontDesign: Font.Design
 
     // Use white color in glass mode for better visibility on glass background
     var effectiveTextColor: Color {
@@ -139,7 +129,8 @@ struct QuoteEntry: TimelineEntry {
         dayNumber: 1,
         backgroundColor: Color(argb: 0xFF1A1A1A),
         textColor: .white,
-        isGlassMode: false
+        isGlassMode: false,
+        fontDesign: .serif
     )
 }
 
@@ -153,7 +144,7 @@ struct Provider: TimelineProvider {
 
     // Keys for storing widget-specific data
     private let startDateKey = "widget_start_date"
-    private let shuffledOrderKey = "widget_shuffled_order"
+    private let userSeedKey = "widget_user_seed"
 
     func placeholder(in context: Context) -> QuoteEntry {
         QuoteEntry.placeholder
@@ -178,25 +169,85 @@ struct Provider: TimelineProvider {
         // Batch read all values using dictionaryRepresentation for fewer I/O calls
         let dict = defaults.dictionaryRepresentation()
 
-        // Calculate the current day number based on start date
-        let dayNumber = calculateDayNumber(from: dict, defaults: defaults)
+        // Check if Flutter's data is from today
+        let isDataFresh = isLastUpdateFromToday(dict)
 
-        // Get the quote for today using shuffled order
-        let (quoteText, author) = getQuoteForDay(dayNumber: dayNumber, from: dict, defaults: defaults)
+        let finalQuoteText: String
+        let finalAuthor: String
+        let dayNumber = dict["day_number"] as? Int ?? 1
+
+        if isDataFresh, let qt = dict["quote_text"] as? String, let a = dict["quote_author"] as? String, !qt.isEmpty {
+            // Flutter data is fresh (from today) — use it directly (already translated)
+            finalQuoteText = qt
+            finalAuthor = a
+        } else if let (cachedText, cachedAuthor) = getQuoteFromTranslatedCache(dict) {
+            // Flutter data is stale, but we have a pre-cached translated quote for today
+            finalQuoteText = cachedText
+            finalAuthor = cachedAuthor
+        } else {
+            // No cache available — fall back to embedded English quotes
+            let (fallbackText, fallbackAuthor) = getQuoteForDay(from: dict, defaults: defaults)
+            finalQuoteText = fallbackText
+            finalAuthor = fallbackAuthor
+        }
 
         let backgroundColorValue = getColorFromDict(dict, forKey: "widget_background_color", default: defaultBackgroundColor)
         let textColorValue = getColorFromDict(dict, forKey: "widget_text_color", default: defaultTextColor)
         let isGlassMode = dict["widget_glass_mode"] as? Bool ?? false
+        let fontDesign = mapFontDesign(dict["widget_font"] as? String)
 
         return QuoteEntry(
             date: Date(),
-            quoteText: quoteText,
-            author: author,
+            quoteText: finalQuoteText,
+            author: finalAuthor,
             dayNumber: dayNumber,
             backgroundColor: Color(argb: backgroundColorValue),
             textColor: Color(argb: textColorValue),
-            isGlassMode: isGlassMode
+            isGlassMode: isGlassMode,
+            fontDesign: fontDesign
         )
+    }
+
+    /// Map font key string to SwiftUI Font.Design
+    private func mapFontDesign(_ fontKey: String?) -> Font.Design {
+        switch fontKey {
+        case "classic": return .serif
+        case "modern": return .default
+        case "rounded": return .rounded
+        case "elegantSerif": return .serif
+        case "monospace": return .monospaced
+        default: return .serif
+        }
+    }
+
+    /// Check if the last_updated timestamp is from today
+    private func isLastUpdateFromToday(_ dict: [String: Any]) -> Bool {
+        guard let lastUpdated = dict["last_updated"] as? String else { return false }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let updateDate = formatter.date(from: lastUpdated) ?? ISO8601DateFormatter().date(from: lastUpdated) else { return false }
+        return Calendar.current.isDateInToday(updateDate)
+    }
+
+    /// Try to get today's translated quote from the pre-cached JSON
+    private func getQuoteFromTranslatedCache(_ dict: [String: Any]) -> (String, String)? {
+        guard let cacheJson = dict["widget_translated_cache"] as? String,
+              let cacheData = cacheJson.data(using: .utf8),
+              let cache = try? JSONSerialization.jsonObject(with: cacheData) as? [String: [String: String]] else {
+            return nil
+        }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayKey = formatter.string(from: Date())
+
+        guard let entry = cache[todayKey],
+              let text = entry["text"],
+              let author = entry["author"] else {
+            return nil
+        }
+
+        return (text, author)
     }
 
     /// Calculate the day number based on start date
@@ -216,42 +267,38 @@ struct Provider: TimelineProvider {
         return days + 1 // Day 1 is the first day
     }
 
-    /// Get the quote for a specific day using the shuffled order
-    private func getQuoteForDay(dayNumber: Int, from dict: [String: Any], defaults: UserDefaults) -> (String, String) {
-        let shuffledOrder = getOrCreateShuffledOrder(from: dict, defaults: defaults)
+    /// Get the quote for today using date + user seed for deterministic randomness
+    private func getQuoteForDay(from dict: [String: Any], defaults: UserDefaults) -> (String, String) {
+        let seed = getUserSeed(from: dict, defaults: defaults)
+        let calendar = Calendar.current
+        let today = Date()
+        let year = calendar.component(.year, from: today)
+        let month = calendar.component(.month, from: today)
+        let day = calendar.component(.day, from: today)
 
-        // Use modulo to cycle through quotes (for users past day 30)
-        let index = (dayNumber - 1) % shuffledOrder.count
-        let quoteIndex = shuffledOrder[index]
+        // Same formula as the Flutter side: dateKey ^ seed
+        let dateKey = year * 10000 + month * 100 + day
+        let combined = dateKey ^ seed
 
-        // Get the quote from embedded data (0-indexed)
-        guard quoteIndex >= 0 && quoteIndex < stoicQuotes.count else {
-            return (stoicQuotes[0].text, stoicQuotes[0].author)
-        }
-
-        let quote = stoicQuotes[quoteIndex]
+        // Same formula as Flutter: abs(combined) % 1000 gives quoteIndex (0-999)
+        // But we only have 30 embedded quotes, so map to our embedded array
+        let index = abs(combined) % stoicQuotes.count
+        let quote = stoicQuotes[index]
         return (quote.text, quote.author)
     }
 
-    /// Get existing shuffled order or create a new one
-    private func getOrCreateShuffledOrder(from dict: [String: Any], defaults: UserDefaults) -> [Int] {
-        // Check if shuffled order already exists (stored as comma-separated string from Flutter)
-        if let savedOrderString = dict[shuffledOrderKey] as? String, !savedOrderString.isEmpty {
-            let parsedOrder = savedOrderString.components(separatedBy: ",").compactMap { Int($0) }
-            if !parsedOrder.isEmpty {
-                return parsedOrder
-            }
+    /// Get user seed synced from Flutter, or create a fallback
+    private func getUserSeed(from dict: [String: Any], defaults: UserDefaults) -> Int {
+        if let seed = dict[userSeedKey] as? Int {
+            return seed
         }
-
-        // Create new shuffled order (0 to 29 for array indexing)
-        var order = Array(0..<stoicQuotes.count)
-        order.shuffle()
-
-        // Save the shuffled order as comma-separated string for consistency
-        let orderString = order.map { String($0) }.joined(separator: ",")
-        defaults.set(orderString, forKey: shuffledOrderKey)
-
-        return order
+        if let seed = dict[userSeedKey] as? NSNumber {
+            return seed.intValue
+        }
+        // Fallback: create a local seed
+        let newSeed = Int.random(in: 0..<Int(Int32.max))
+        defaults.set(newSeed, forKey: userSeedKey)
+        return newSeed
     }
 
     /// Extract color from dictionary with type conversion handling
@@ -319,7 +366,7 @@ struct SmallWidgetView: View {
         VStack(alignment: .center, spacing: 4) {
             Spacer()
             Text("\"\(entry.quoteText)\"")
-                .font(.system(size: fontSize))
+                .font(.system(size: fontSize, design: entry.fontDesign))
                 .italic()
                 .foregroundStyle(textColor)
                 .lineLimit(5)
@@ -357,7 +404,7 @@ struct MediumWidgetView: View {
         VStack(alignment: .center, spacing: 8) {
             Spacer()
             Text("\"\(entry.quoteText)\"")
-                .font(.system(size: fontSize))
+                .font(.system(size: fontSize, design: entry.fontDesign))
                 .italic()
                 .foregroundStyle(textColor)
                 .lineLimit(4)
@@ -395,7 +442,7 @@ struct LargeWidgetView: View {
         VStack(alignment: .center, spacing: 16) {
             Spacer()
             Text("\"\(entry.quoteText)\"")
-                .font(.system(size: fontSize))
+                .font(.system(size: fontSize, design: entry.fontDesign))
                 .italic()
                 .foregroundStyle(textColor)
                 .lineLimit(8)
@@ -453,7 +500,7 @@ struct ExtraLargeWidgetView: View {
             VStack(alignment: .center, spacing: 20) {
                 Spacer()
                 Text("\"\(entry.quoteText)\"")
-                    .font(.system(size: fontSize))
+                    .font(.system(size: fontSize, design: entry.fontDesign))
                     .italic()
                     .foregroundStyle(textColor)
                     .lineLimit(10)

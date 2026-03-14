@@ -17,4 +17,7 @@ abstract class WidgetRepository {
 
   /// Trigger widget refresh after appearance changes
   Future<Either<Failure, void>> refreshWidget();
+
+  /// Clean up resources
+  Future<void> dispose();
 }

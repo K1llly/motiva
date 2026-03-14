@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Core
 import '../core/utils/date_utils.dart';
 import '../core/constants/storage_keys.dart';
+import '../core/services/quote_translation_service.dart';
 
 // Quote Feature
 import '../features/quote/domain/repositories/quote_repository.dart';
@@ -15,15 +17,6 @@ import '../features/quote/data/datasources/quote_local_datasource.dart';
 import '../features/quote/data/datasources/quote_local_datasource_impl.dart';
 import '../features/quote/data/repositories/quote_repository_impl.dart';
 import '../features/quote/presentation/bloc/quote_bloc.dart';
-
-// Streak Feature
-import '../features/streak/domain/repositories/streak_repository.dart';
-import '../features/streak/domain/usecases/get_current_streak.dart';
-import '../features/streak/domain/usecases/increment_streak.dart';
-import '../features/streak/domain/usecases/reset_streak.dart';
-import '../features/streak/data/datasources/streak_local_datasource.dart';
-import '../features/streak/data/repositories/streak_repository_impl.dart';
-import '../features/streak/presentation/bloc/streak_bloc.dart';
 
 // Sharing Feature
 import '../features/sharing/domain/repositories/share_repository.dart';
@@ -57,7 +50,16 @@ import '../features/settings/domain/repositories/settings_repository.dart';
 import '../features/settings/data/repositories/settings_repository_impl.dart';
 import '../features/settings/presentation/bloc/settings_bloc.dart';
 
+// Favorites Feature
+import '../features/favorites/domain/repositories/favorites_repository.dart';
+import '../features/favorites/domain/usecases/get_favorites.dart';
+import '../features/favorites/domain/usecases/toggle_favorite.dart';
+import '../features/favorites/data/datasources/favorites_local_datasource.dart';
+import '../features/favorites/data/repositories/favorites_repository_impl.dart';
+import '../features/favorites/presentation/bloc/favorites_bloc.dart';
+
 final sl = GetIt.instance;
+Timer? _compactionTimer;
 
 Future<void> init() async {
   //! External
@@ -68,39 +70,52 @@ Future<void> init() async {
 
   //! Features
   _initQuoteFeature();
-  _initStreakFeature();
   _initSharingFeature();
   _initWidgetFeature();
   _initNotificationFeature();
   _initSettingsFeature();
+  _initFavoritesFeature();
 }
 
 /// Cleanup resources - call on app termination
 Future<void> dispose() async {
-  // Close Hive boxes to free memory
-  await Hive.close();
+  // 1. Cancel pending compaction timer
+  _compactionTimer?.cancel();
+  _compactionTimer = null;
 
-  // Dispose widget repository subscription
-  final widgetRepo = sl<WidgetRepository>();
-  if (widgetRepo is WidgetRepositoryImpl) {
-    await widgetRepo.dispose();
+  // 2. Dispose repositories first (they may depend on Hive boxes)
+  try {
+    final widgetRepo = sl<WidgetRepository>();
+    if (widgetRepo is WidgetRepositoryImpl) {
+      await widgetRepo.dispose();
+    }
+  } catch (_) {
+    // Repository may not be registered yet
   }
 
-  // Reset GetIt
-  await sl.reset();
+  // 3. Close Hive boxes
+  try {
+    await Hive.close();
+  } catch (_) {
+    // Hive may already be closed
+  }
+
+  // 4. Reset GetIt last
+  try {
+    await sl.reset();
+  } catch (_) {
+    // GetIt may already be reset
+  }
 }
 
 Future<void> _initExternal() async {
   // Hive
   await Hive.initFlutter();
   final quoteBox = await Hive.openBox<Map>(StorageKeys.quotesBox);
-  final streakBox = await Hive.openBox<Map>(StorageKeys.streakBox);
   final userDataBox = await Hive.openBox<Map>(StorageKeys.userDataBox);
 
   // Register boxes immediately for fast startup
   sl.registerLazySingleton<Box<Map>>(() => quoteBox, instanceName: 'quoteBox');
-  sl.registerLazySingleton<Box<Map>>(() => streakBox,
-      instanceName: 'streakBox');
   sl.registerLazySingleton<Box<Map>>(() => userDataBox,
       instanceName: 'userDataBox');
 
@@ -109,11 +124,10 @@ Future<void> _initExternal() async {
   sl.registerLazySingleton(() => prefs);
 
   // Compact boxes in background after app is fully initialized
-  // Use delayed instead of microtask to avoid race conditions with Hive reads
-  Future.delayed(const Duration(seconds: 5), () async {
+  // Use timer (cancellable) instead of Future.delayed to prevent post-disposal crashes
+  _compactionTimer = Timer(const Duration(seconds: 5), () async {
     try {
       await quoteBox.compact();
-      await streakBox.compact();
       await userDataBox.compact();
     } catch (_) {
       // Ignore compaction errors - not critical for app function
@@ -126,6 +140,9 @@ void _initCore() {
   sl.registerLazySingleton<DateUtilsService>(
     () => DateUtilsServiceImpl(prefs: sl()),
   );
+
+  // Quote translation service
+  sl.registerLazySingleton(() => QuoteTranslationService());
 }
 
 void _initQuoteFeature() {
@@ -133,9 +150,9 @@ void _initQuoteFeature() {
   sl.registerFactory(
     () => QuoteBloc(
       getDailyQuote: sl(),
-      incrementStreak: sl(),
       updateWidgetData: sl(),
       getCurrentDayNumber: () => sl<DateUtilsService>().getCurrentDayNumber(),
+      translationService: sl(),
     ),
   );
 
@@ -154,34 +171,6 @@ void _initQuoteFeature() {
     () => QuoteLocalDataSourceImpl(
       quoteBox: sl<Box<Map>>(instanceName: 'quoteBox'),
       prefs: sl(),
-    ),
-  );
-}
-
-void _initStreakFeature() {
-  // BLoC
-  sl.registerFactory(
-    () => StreakBloc(
-      getCurrentStreak: sl(),
-      incrementStreak: sl(),
-      resetStreak: sl(),
-    ),
-  );
-
-  // Use Cases
-  sl.registerLazySingleton(() => GetCurrentStreak(sl()));
-  sl.registerLazySingleton(() => IncrementStreak(sl()));
-  sl.registerLazySingleton(() => ResetStreak(sl()));
-
-  // Repository
-  sl.registerLazySingleton<StreakRepository>(
-    () => StreakRepositoryImpl(localDataSource: sl()),
-  );
-
-  // Data Sources
-  sl.registerLazySingleton<StreakLocalDataSource>(
-    () => StreakLocalDataSourceImpl(
-      streakBox: sl<Box<Map>>(instanceName: 'streakBox'),
     ),
   );
 }
@@ -247,6 +236,7 @@ void _initNotificationFeature() {
       notificationRepository: sl(),
       getDailyQuote: sl(),
       getCurrentDayNumber: () => sl<DateUtilsService>().getCurrentDayNumber(),
+      translationService: sl(),
     ),
   );
 
@@ -259,12 +249,47 @@ void _initNotificationFeature() {
 void _initSettingsFeature() {
   // BLoC
   sl.registerFactory(
-    () => SettingsBloc(sl()),
+    () => SettingsBloc(
+      sl(),
+      sl<QuoteTranslationService>(),
+      getDailyQuote: sl(),
+      updateWidgetData: sl(),
+      getCurrentDayNumber: () => sl<DateUtilsService>().getCurrentDayNumber(),
+      notificationRepository: sl(),
+      notificationService: sl(),
+      scheduleDailyNotification: sl(),
+    ),
   );
 
   // Repository
   sl.registerLazySingleton<SettingsRepository>(
     () => SettingsRepositoryImpl(sl()),
+  );
+}
+
+void _initFavoritesFeature() {
+  // BLoC
+  sl.registerFactory(
+    () => FavoritesBloc(
+      getFavorites: sl(),
+      toggleFavorite: sl(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton(() => GetFavorites(sl()));
+  sl.registerLazySingleton(() => ToggleFavorite(sl()));
+
+  // Repository
+  sl.registerLazySingleton<FavoritesRepository>(
+    () => FavoritesRepositoryImpl(dataSource: sl()),
+  );
+
+  // Data Sources
+  sl.registerLazySingleton(
+    () => FavoritesLocalDataSource(
+      userDataBox: sl<Box<Map>>(instanceName: 'userDataBox'),
+    ),
   );
 }
 

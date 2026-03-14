@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stoic_mind/features/quote/domain/entities/quote.dart';
 import 'package:stoic_mind/features/quote/presentation/screens/quote_detail_screen.dart';
+import 'package:stoic_mind/l10n/app_localizations.dart';
 
 void main() {
   const tQuote = Quote(
@@ -15,6 +16,9 @@ void main() {
 
   Widget createWidgetUnderTest({Quote quote = tQuote}) {
     return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
       home: QuoteDetailScreen(quote: quote),
     );
   }

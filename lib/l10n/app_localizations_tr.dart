@@ -101,5 +101,117 @@ class AppLocalizationsTr extends AppLocalizations {
   String get russian => 'Русский';
 
   @override
+  String get spanish => 'Español';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get portuguese => 'Português';
+
+  @override
+  String get italian => 'Italiano';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get chinese => '中文';
+
+  @override
+  String get japanese => '日本語';
+
+  @override
+  String get korean => '한국어';
+
+  @override
+  String get hindi => 'हिन्दी';
+
+  @override
   String get dailyStoicQuote => 'Günlük Stoacı Alıntı';
+
+  @override
+  String get languages => 'Diller';
+
+  @override
+  String get notifications => 'Bildirimler';
+
+  @override
+  String get appearance => 'Görünüm';
+
+  @override
+  String get enableNotifications => 'Bildirimleri Etkinleştir';
+
+  @override
+  String get notificationTime => 'Bildirim Saati';
+
+  @override
+  String get dailyReminder => 'Günlük Hatırlatma';
+
+  @override
+  String get receiveQuoteDaily => 'Her gün bir stoa alıntısı al';
+
+  @override
+  String get themeMode => 'Tema';
+
+  @override
+  String get systemTheme => 'Sistem';
+
+  @override
+  String get lightTheme => 'Açık';
+
+  @override
+  String get darkTheme => 'Koyu';
+
+  @override
+  String get onboardingWelcomeTitle => 'Motiva\'ya Hoş Geldiniz';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Hayat yolculuğunuzda size ilham verecek ve rehberlik edecek günlük stoacı bilgelik kaynağınız.';
+
+  @override
+  String get onboardingLanguageTitle => 'Dilinizi Seçin';
+
+  @override
+  String get onboardingLanguageDescription =>
+      'Alıntılar ve uygulama arayüzü için tercih ettiğiniz dili seçin.';
+
+  @override
+  String get onboardingReadyTitle => 'Hazırsınız!';
+
+  @override
+  String get onboardingReadyDescription =>
+      'Yolculuğunuza ilham verecek günlük stoacı alıntılar almaya başlayın.';
+
+  @override
+  String get onboardingGetStarted => 'Yolculuğunuza Başlayın';
+
+  @override
+  String get onboardingNext => 'İleri';
+
+  @override
+  String get favorites => 'Favoriler';
+
+  @override
+  String get noFavorites => 'Henüz favori yok';
+
+  @override
+  String get noFavoritesDescription =>
+      'Bir alıntıyı buraya kaydetmek için kalp simgesine dokunun.';
+
+  @override
+  String get addedToFavorites => 'Favorilere eklendi';
+
+  @override
+  String get removedFromFavorites => 'Favorilerden kaldırıldı';
+
+  @override
+  String get font => 'Font';
+
+  @override
+  String get widgetFont => 'Widget Font';
+
+  @override
+  String get selectFont => 'Select Font';
 }

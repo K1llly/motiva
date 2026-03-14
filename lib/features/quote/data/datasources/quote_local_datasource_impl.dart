@@ -11,8 +11,8 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
   final Box<Map> quoteBox;
   final SharedPreferences prefs;
 
-  // Memory cache for shuffled order to avoid repeated string-to-int parsing
-  List<int>? _shuffledOrderCache;
+  // Memory cache for user seed
+  int? _userSeedCache;
 
   QuoteLocalDataSourceImpl({
     required this.quoteBox,
@@ -21,54 +21,46 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
 
   @override
   Future<QuoteModel> getQuoteForDay(int dayNumber) async {
-    // Get or create shuffled order for this user
-    final shuffledOrder = await _getOrCreateShuffledOrder();
+    final seed = await _getOrCreateUserSeed();
+    final now = DateTime.now();
 
-    // Use modulo for cycling through quotes (when user has more days than quotes)
-    final index = (dayNumber - 1) % shuffledOrder.length;
-    final quoteNumber = shuffledOrder[index];
+    // Deterministic random index from today's date + user seed
+    // Must match the iOS widget formula: abs(dateKey ^ seed) % totalQuotes
+    final dateKey = now.year * 10000 + now.month * 100 + now.day;
+    final combined = dateKey ^ seed;
+    final quoteIndex = (combined.abs() % AppConstants.totalQuotes) + 1;
 
-    // Use direct key lookup instead of iterating all values (saves memory)
-    final quoteId = 'q${quoteNumber.toString().padLeft(3, '0')}';
+    final quoteId = 'q${quoteIndex.toString().padLeft(3, '0')}';
     final quoteData = quoteBox.get(quoteId);
 
     if (quoteData == null) {
-      throw CacheException('Quote not found for day $quoteNumber');
+      throw CacheException('Quote not found for index $quoteIndex');
     }
 
     return QuoteModel.fromJson(Map<String, dynamic>.from(quoteData));
   }
 
-  /// Get existing shuffled order or create a new one
-  /// Uses memory cache to avoid repeated string-to-int parsing
-  Future<List<int>> _getOrCreateShuffledOrder() async {
-    // Return cached order if available
-    if (_shuffledOrderCache != null) {
-      return _shuffledOrderCache!;
+  /// Get existing user seed or create a new one
+  Future<int> _getOrCreateUserSeed() async {
+    if (_userSeedCache != null) {
+      return _userSeedCache!;
     }
 
-    final savedOrder = prefs.getStringList(StorageKeys.shuffledQuoteOrder);
-
-    if (savedOrder != null && savedOrder.isNotEmpty) {
-      // Parse and cache the order
-      _shuffledOrderCache = savedOrder.map((s) => int.parse(s)).toList();
-      return _shuffledOrderCache!;
+    final saved = prefs.getInt(StorageKeys.userSeed);
+    if (saved != null) {
+      _userSeedCache = saved;
+      return saved;
     }
 
-    // Create new shuffled order unique to this user
-    final order = List<int>.generate(AppConstants.totalQuotes, (i) => i + 1);
-    order.shuffle(Random());
+    // Create new seed unique to this user
+    final newSeed = Random().nextInt(1 << 31);
+    _userSeedCache = newSeed;
+    await prefs.setInt(StorageKeys.userSeed, newSeed);
 
-    // Cache it
-    _shuffledOrderCache = order;
+    // Clean up legacy shuffled order if it exists
+    await prefs.remove(StorageKeys.shuffledQuoteOrder);
 
-    // Save for persistence
-    await prefs.setStringList(
-      StorageKeys.shuffledQuoteOrder,
-      order.map((i) => i.toString()).toList(),
-    );
-
-    return _shuffledOrderCache!;
+    return newSeed;
   }
 
   @override
@@ -113,6 +105,12 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
 
   @override
   Future<List<int>> getShuffledOrder() async {
-    return _getOrCreateShuffledOrder();
+    // Legacy method - return empty list, no longer used
+    return [];
+  }
+
+  /// Get the user seed (for syncing to widget)
+  Future<int> getUserSeed() async {
+    return _getOrCreateUserSeed();
   }
 }

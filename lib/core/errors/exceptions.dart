@@ -2,7 +2,7 @@
 class AppException implements Exception {
   final String message;
 
-  AppException(this.message);
+  const AppException(this.message);
 
   @override
   String toString() => message;
@@ -10,15 +10,15 @@ class AppException implements Exception {
 
 /// Exception when cache operations fail
 class CacheException extends AppException {
-  CacheException(super.message);
+  const CacheException(super.message);
 }
 
 /// Exception when network operations fail
 class NetworkException extends AppException {
-  NetworkException(super.message);
+  const NetworkException(super.message);
 }
 
 /// Exception when widget operations fail
 class WidgetException extends AppException {
-  WidgetException(super.message);
+  const WidgetException(super.message);
 }

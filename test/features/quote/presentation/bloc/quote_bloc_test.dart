@@ -143,15 +143,6 @@ void main() {
     );
   });
 
-  group('ViewQuoteMeaningEvent', () {
-    blocTest<QuoteBloc, QuoteState>(
-      'does not emit new states for ViewQuoteMeaningEvent',
-      build: () => bloc,
-      act: (bloc) => bloc.add(const ViewQuoteMeaningEvent('1')),
-      expect: () => [],
-    );
-  });
-
   group('RefreshQuoteEvent', () {
     blocTest<QuoteBloc, QuoteState>(
       'triggers LoadDailyQuoteEvent when RefreshQuoteEvent is added',

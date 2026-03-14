@@ -50,28 +50,28 @@ class ShareBottomSheet extends StatelessWidget {
                 label: l10n.instagram,
                 color: const Color(0xFFE4405F),
                 labelStyle: theme.textTheme.bodySmall,
-                onTap: () => _shareToInstagram(context, l10n),
+                onTap: () => _share(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.alternate_email,
                 label: l10n.twitter,
                 color: const Color(0xFF1DA1F2),
                 labelStyle: theme.textTheme.bodySmall,
-                onTap: () => _shareToTwitter(context, l10n),
+                onTap: () => _share(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.chat_bubble,
                 label: l10n.whatsapp,
                 color: const Color(0xFF25D366),
                 labelStyle: theme.textTheme.bodySmall,
-                onTap: () => _shareToWhatsApp(context, l10n),
+                onTap: () => _share(context, l10n),
               ),
               _ShareOption(
                 icon: Icons.more_horiz,
                 label: l10n.more,
                 color: colorScheme.secondary,
                 labelStyle: theme.textTheme.bodySmall,
-                onTap: () => _shareGeneric(context, l10n),
+                onTap: () => _share(context, l10n),
               ),
             ],
           ),
@@ -91,25 +91,7 @@ class ShareBottomSheet extends StatelessWidget {
     return StringUtils.formatQuoteForSharing(quote.text, quote.author);
   }
 
-  void _shareToInstagram(BuildContext context, AppLocalizations l10n) {
-    final text = _getShareText();
-    Share.share(text, subject: l10n.dailyStoicQuote);
-    Navigator.pop(context);
-  }
-
-  void _shareToTwitter(BuildContext context, AppLocalizations l10n) {
-    final text = _getShareText();
-    Share.share(text, subject: l10n.dailyStoicQuote);
-    Navigator.pop(context);
-  }
-
-  void _shareToWhatsApp(BuildContext context, AppLocalizations l10n) {
-    final text = _getShareText();
-    Share.share(text, subject: l10n.dailyStoicQuote);
-    Navigator.pop(context);
-  }
-
-  void _shareGeneric(BuildContext context, AppLocalizations l10n) {
+  void _share(BuildContext context, AppLocalizations l10n) {
     final text = _getShareText();
     Share.share(text, subject: l10n.dailyStoicQuote);
     Navigator.pop(context);

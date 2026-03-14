@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../../domain/entities/quote.dart';
 
 class QuoteCard extends StatelessWidget {
   final Quote quote;
+  final String displayText;
+  final bool showFavoriteButton;
 
-  const QuoteCard({super.key, required this.quote});
+  const QuoteCard({
+    super.key,
+    required this.quote,
+    required this.displayText,
+    this.showFavoriteButton = true,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Cache theme references once to avoid repeated lookups
     final colorScheme = Theme.of(context).colorScheme;
     final secondaryColor = colorScheme.secondary;
 
     return Card(
-      elevation: 0, // Reduced to save GPU memory (IOSurface)
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
@@ -27,6 +34,11 @@ class QuoteCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (showFavoriteButton)
+              Align(
+                alignment: Alignment.topRight,
+                child: FavoriteButton(quoteId: quote.id),
+              ),
             Icon(
               Icons.format_quote,
               size: 40,
@@ -34,7 +46,7 @@ class QuoteCard extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              quote.text,
+              displayText,
               style: AppTypography.quoteStyle(context).copyWith(
                 color: colorScheme.onSurface,
               ),

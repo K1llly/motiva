@@ -6,8 +6,9 @@ class AppConstants {
   static const String appVersion = '1.0.0';
 
   /// Total number of quotes in the database
-  static const int totalQuotes = 30;
+  static const int totalQuotes = 1000;
 
-  /// Maximum streak days to track
-  static const int maxStreakDisplay = 999;
+  /// Quotes data version - increment when quotes data changes
+  static const int quotesVersion = 2;
+
 }

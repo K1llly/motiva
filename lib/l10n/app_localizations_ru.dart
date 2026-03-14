@@ -101,5 +101,117 @@ class AppLocalizationsRu extends AppLocalizations {
   String get russian => 'Русский';
 
   @override
+  String get spanish => 'Español';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get portuguese => 'Português';
+
+  @override
+  String get italian => 'Italiano';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get chinese => '中文';
+
+  @override
+  String get japanese => '日本語';
+
+  @override
+  String get korean => '한국어';
+
+  @override
+  String get hindi => 'हिन्दी';
+
+  @override
   String get dailyStoicQuote => 'Ежедневная Стоическая Цитата';
+
+  @override
+  String get languages => 'Языки';
+
+  @override
+  String get notifications => 'Уведомления';
+
+  @override
+  String get appearance => 'Внешний вид';
+
+  @override
+  String get enableNotifications => 'Включить уведомления';
+
+  @override
+  String get notificationTime => 'Время уведомления';
+
+  @override
+  String get dailyReminder => 'Ежедневное напоминание';
+
+  @override
+  String get receiveQuoteDaily => 'Получайте стоическую цитату каждый день';
+
+  @override
+  String get themeMode => 'Тема';
+
+  @override
+  String get systemTheme => 'Системная';
+
+  @override
+  String get lightTheme => 'Светлая';
+
+  @override
+  String get darkTheme => 'Тёмная';
+
+  @override
+  String get onboardingWelcomeTitle => 'Добро пожаловать в Motiva';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Ваш ежедневный источник стоической мудрости, который вдохновляет и направляет вас на жизненном пути.';
+
+  @override
+  String get onboardingLanguageTitle => 'Выберите язык';
+
+  @override
+  String get onboardingLanguageDescription =>
+      'Выберите предпочитаемый язык для цитат и интерфейса приложения.';
+
+  @override
+  String get onboardingReadyTitle => 'Всё готово!';
+
+  @override
+  String get onboardingReadyDescription =>
+      'Начните получать ежедневные стоические цитаты для вдохновения.';
+
+  @override
+  String get onboardingGetStarted => 'Начните свой путь';
+
+  @override
+  String get onboardingNext => 'Далее';
+
+  @override
+  String get favorites => 'Избранное';
+
+  @override
+  String get noFavorites => 'Пока нет избранного';
+
+  @override
+  String get noFavoritesDescription =>
+      'Нажмите на значок сердца на цитате, чтобы сохранить её здесь.';
+
+  @override
+  String get addedToFavorites => 'Добавлено в избранное';
+
+  @override
+  String get removedFromFavorites => 'Удалено из избранного';
+
+  @override
+  String get font => 'Font';
+
+  @override
+  String get widgetFont => 'Widget Font';
+
+  @override
+  String get selectFont => 'Select Font';
 }

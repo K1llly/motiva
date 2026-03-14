@@ -5,6 +5,7 @@ import 'package:stoic_mind/core/constants/notification_constants.dart';
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
+  static bool _timezonesInitialized = false;
 
   NotificationService({
     FlutterLocalNotificationsPlugin? notificationsPlugin,
@@ -13,7 +14,20 @@ class NotificationService {
 
   /// Initialize the notification service
   Future<void> initialize() async {
-    tz_data.initializeTimeZones();
+    if (!_timezonesInitialized) {
+      tz_data.initializeTimeZones();
+      // Set local timezone based on device's UTC offset
+      final now = DateTime.now();
+      final offset = now.timeZoneOffset;
+      final locations = tz.timeZoneDatabase.locations;
+      for (final loc in locations.values) {
+        if (loc.currentTimeZone.offset == offset.inMilliseconds) {
+          tz.setLocalLocation(loc);
+          break;
+        }
+      }
+      _timezonesInitialized = true;
+    }
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
@@ -36,7 +50,7 @@ class NotificationService {
     await _createNotificationChannel();
   }
 
-  /// Request notification permissions
+  /// Request notification permissions (skips if already granted)
   Future<bool> requestPermissions() async {
     final android = _notificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -47,11 +61,12 @@ class NotificationService {
             IOSFlutterLocalNotificationsPlugin>();
 
     if (android != null) {
+      // Check if already granted to avoid redundant native calls
+      final areEnabled = await android.areNotificationsEnabled();
+      if (areEnabled == true) return true;
+
       // Request notification permission
       final notificationGranted = await android.requestNotificationsPermission();
-
-      // Request exact alarm permission for scheduling (Android 12+)
-      await android.requestExactAlarmsPermission();
 
       return notificationGranted ?? false;
     }
@@ -68,6 +83,33 @@ class NotificationService {
     return false;
   }
 
+  /// Build notification details with consistent settings
+  NotificationDetails _buildNotificationDetails(String body, String author) {
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        NotificationConstants.channelId,
+        NotificationConstants.channelName,
+        channelDescription: NotificationConstants.channelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+        category: AndroidNotificationCategory.reminder,
+        styleInformation: BigTextStyleInformation(
+          body,
+          htmlFormatBigText: true,
+          contentTitle: '<b>${NotificationConstants.notificationTitle}</b>',
+          htmlFormatContentTitle: true,
+          summaryText: author,
+          htmlFormatSummaryText: true,
+        ),
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    );
+  }
+
   /// Schedule daily notification at specified time
   Future<void> scheduleDailyNotification({
     required String quoteText,
@@ -82,30 +124,8 @@ class NotificationService {
       NotificationConstants.notificationTitle,
       body,
       _nextInstanceOfTime(hour, minute),
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          NotificationConstants.channelId,
-          NotificationConstants.channelName,
-          channelDescription: NotificationConstants.channelDescription,
-          importance: Importance.max,
-          priority: Priority.max,
-          category: AndroidNotificationCategory.reminder,
-          styleInformation: BigTextStyleInformation(
-            body,
-            htmlFormatBigText: true,
-            contentTitle: '<b>${NotificationConstants.notificationTitle}</b>',
-            htmlFormatContentTitle: true,
-            summaryText: author,
-            htmlFormatSummaryText: true,
-          ),
-        ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      _buildNotificationDetails(body, author),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
@@ -133,29 +153,7 @@ class NotificationService {
       NotificationConstants.dailyQuoteNotificationId,
       NotificationConstants.notificationTitle,
       body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          NotificationConstants.channelId,
-          NotificationConstants.channelName,
-          channelDescription: NotificationConstants.channelDescription,
-          importance: Importance.max,
-          priority: Priority.max,
-          category: AndroidNotificationCategory.reminder,
-          styleInformation: BigTextStyleInformation(
-            body,
-            htmlFormatBigText: true,
-            contentTitle: '<b>${NotificationConstants.notificationTitle}</b>',
-            htmlFormatContentTitle: true,
-            summaryText: author,
-            htmlFormatSummaryText: true,
-          ),
-        ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
+      _buildNotificationDetails(body, author),
     );
   }
 

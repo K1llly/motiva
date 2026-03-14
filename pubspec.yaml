@@ -16,7 +16,9 @@ dependencies:
 
   # State Management
   flutter_bloc: ^8.1.3
+  bloc_concurrency: ^0.2.2
   equatable: ^2.0.5
+  stream_transform: ^2.1.0
 
   # Dependency Injection
   get_it: ^7.6.4
@@ -33,7 +35,7 @@ dependencies:
   home_widget: ^0.7.0
 
   # Sharing
-  share_plus: ^7.2.1
+  share_plus: ^10.0.0
 
   # Notifications
   flutter_local_notifications: ^17.0.0
@@ -69,3 +71,5 @@ flutter:
   assets:
     - assets/quotes/
     - assets/images/
+    - assets/translations/
+    - google_fonts/

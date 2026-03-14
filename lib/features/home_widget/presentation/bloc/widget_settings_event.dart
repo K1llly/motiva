@@ -33,6 +33,15 @@ class ToggleGlassModeEvent extends WidgetSettingsEvent {
   const ToggleGlassModeEvent();
 }
 
+class UpdateWidgetFontEvent extends WidgetSettingsEvent {
+  final String fontKey;
+
+  const UpdateWidgetFontEvent(this.fontKey);
+
+  @override
+  List<Object?> get props => [fontKey];
+}
+
 class SaveWidgetSettingsEvent extends WidgetSettingsEvent {
   const SaveWidgetSettingsEvent();
 }

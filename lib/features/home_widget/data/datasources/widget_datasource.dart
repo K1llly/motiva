@@ -10,8 +10,9 @@ abstract class WidgetDataSource {
   });
   Future<void> updateWidget();
   Future<DateTime?> getLastUpdateTime();
-  Future<void> syncShuffledOrder(List<int> shuffledOrder);
+  Future<void> syncUserSeed(int userSeed);
   Future<void> syncStartDate(DateTime startDate);
+  Future<void> saveTranslatedCache(String jsonString);
 }
 
 class WidgetDataSourceImpl implements WidgetDataSource {
@@ -22,9 +23,6 @@ class WidgetDataSourceImpl implements WidgetDataSource {
     required int dayNumber,
   }) async {
     try {
-      // Set app group for iOS
-      await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
-
       // Save data to shared storage
       await Future.wait([
         HomeWidget.saveWidgetData<String>(
@@ -77,26 +75,20 @@ class WidgetDataSourceImpl implements WidgetDataSource {
   }
 
   @override
-  Future<void> syncShuffledOrder(List<int> shuffledOrder) async {
+  Future<void> syncUserSeed(int userSeed) async {
     try {
-      await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
-      // Convert to 0-indexed for Swift (Flutter uses 1-30, Swift needs 0-29)
-      // Serialize as comma-separated string since home_widget only supports primitives
-      final zeroIndexedOrder = shuffledOrder.map((i) => i - 1).toList();
-      final serialized = zeroIndexedOrder.join(',');
-      await HomeWidget.saveWidgetData<String>(
-        WidgetConstants.shuffledOrderKey,
-        serialized,
+      await HomeWidget.saveWidgetData<int>(
+        WidgetConstants.userSeedKey,
+        userSeed,
       );
     } catch (e) {
-      throw WidgetException('Failed to sync shuffled order: $e');
+      throw WidgetException('Failed to sync user seed: $e');
     }
   }
 
   @override
   Future<void> syncStartDate(DateTime startDate) async {
     try {
-      await HomeWidget.setAppGroupId(WidgetConstants.appGroupId);
       // Store as Unix timestamp (seconds since epoch)
       await HomeWidget.saveWidgetData<double>(
         WidgetConstants.startDateKey,
@@ -104,6 +96,18 @@ class WidgetDataSourceImpl implements WidgetDataSource {
       );
     } catch (e) {
       throw WidgetException('Failed to sync start date: $e');
+    }
+  }
+
+  @override
+  Future<void> saveTranslatedCache(String jsonString) async {
+    try {
+      await HomeWidget.saveWidgetData<String>(
+        WidgetConstants.translatedCacheKey,
+        jsonString,
+      );
+    } catch (e) {
+      throw WidgetException('Failed to save translated cache: $e');
     }
   }
 }

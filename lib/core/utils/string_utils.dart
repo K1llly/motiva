@@ -4,7 +4,9 @@ class StringUtils {
 
   /// Truncate text with ellipsis
   static String truncate(String text, int maxLength) {
+    if (maxLength <= 0) return '';
     if (text.length <= maxLength) return text;
+    if (maxLength <= 3) return text.substring(0, maxLength);
     return '${text.substring(0, maxLength - 3)}...';
   }
 

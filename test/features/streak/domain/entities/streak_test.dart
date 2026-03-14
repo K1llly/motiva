@@ -31,7 +31,7 @@ void main() {
         expect(emptyStreak.totalQuotesRead, 0);
       });
 
-      test('should set startDate and lastActiveDate to now', () {
+      test('should set startDate to now and lastActiveDate to yesterday', () {
         final before = DateTime.now();
         final emptyStreak = Streak.empty();
         final after = DateTime.now();
@@ -44,24 +44,33 @@ void main() {
           emptyStreak.startDate.isBefore(after.add(const Duration(seconds: 1))),
           true,
         );
+        // lastActiveDate should be approximately 1 day before now
+        expect(
+          emptyStreak.lastActiveDate.isBefore(emptyStreak.startDate),
+          true,
+        );
+        final diff = emptyStreak.startDate.difference(emptyStreak.lastActiveDate);
+        expect(diff.inDays, 1);
       });
     });
 
-    group('isActive', () {
+    group('isActiveOn', () {
       test('should return true when lastActiveDate is today', () {
+        final now = DateTime.now();
         final activeStreak = Streak(
           currentStreak: 1,
           longestStreak: 1,
-          startDate: tNow,
-          lastActiveDate: tNow,
+          startDate: now,
+          lastActiveDate: now,
           totalQuotesRead: 1,
         );
 
-        expect(activeStreak.isActive, true);
+        expect(activeStreak.isActiveOn(now), true);
       });
 
       test('should return true when lastActiveDate is yesterday', () {
-        final yesterday = DateTime.now().subtract(const Duration(days: 1));
+        final now = DateTime.now();
+        final yesterday = now.subtract(const Duration(days: 1));
         final activeStreak = Streak(
           currentStreak: 1,
           longestStreak: 1,
@@ -70,11 +79,12 @@ void main() {
           totalQuotesRead: 1,
         );
 
-        expect(activeStreak.isActive, true);
+        expect(activeStreak.isActiveOn(now), true);
       });
 
       test('should return false when lastActiveDate is 2+ days ago', () {
-        final twoDaysAgo = DateTime.now().subtract(const Duration(days: 2));
+        final now = DateTime.now();
+        final twoDaysAgo = now.subtract(const Duration(days: 2));
         final inactiveStreak = Streak(
           currentStreak: 1,
           longestStreak: 1,
@@ -83,34 +93,36 @@ void main() {
           totalQuotesRead: 1,
         );
 
-        expect(inactiveStreak.isActive, false);
+        expect(inactiveStreak.isActiveOn(now), false);
       });
     });
 
-    group('daysSinceStart', () {
+    group('daysSinceStartOn', () {
       test('should return 1 when started today', () {
+        final now = DateTime.now();
         final todayStreak = Streak(
           currentStreak: 1,
           longestStreak: 1,
-          startDate: DateTime.now(),
-          lastActiveDate: DateTime.now(),
+          startDate: now,
+          lastActiveDate: now,
           totalQuotesRead: 1,
         );
 
-        expect(todayStreak.daysSinceStart, 1);
+        expect(todayStreak.daysSinceStartOn(now), 1);
       });
 
       test('should return correct days since start', () {
+        final now = DateTime.now();
         const daysAgo = 10;
         final pastStreak = Streak(
           currentStreak: 1,
           longestStreak: 1,
-          startDate: DateTime.now().subtract(const Duration(days: daysAgo)),
-          lastActiveDate: DateTime.now(),
+          startDate: now.subtract(const Duration(days: daysAgo)),
+          lastActiveDate: now,
           totalQuotesRead: 1,
         );
 
-        expect(pastStreak.daysSinceStart, daysAgo + 1);
+        expect(pastStreak.daysSinceStartOn(now), daysAgo + 1);
       });
     });
 

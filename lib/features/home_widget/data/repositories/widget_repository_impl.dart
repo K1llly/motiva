@@ -74,6 +74,7 @@ class WidgetRepositoryImpl implements WidgetRepository {
   }
 
   /// Dispose resources - should be called when repository is no longer needed
+  @override
   Future<void> dispose() async {
     await _widgetClickSubscription?.cancel();
     _widgetClickSubscription = null;

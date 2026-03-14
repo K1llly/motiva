@@ -1,9 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:stream_transform/stream_transform.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/usecases/get_widget_settings.dart';
 import '../../domain/usecases/update_widget_appearance.dart';
 import 'widget_settings_event.dart';
 import 'widget_settings_state.dart';
+
+EventTransformer<E> _debounce<E>(Duration duration) {
+  return (events, mapper) => events.debounce(duration).switchMap(mapper);
+}
 
 class WidgetSettingsBloc
     extends Bloc<WidgetSettingsEvent, WidgetSettingsState> {
@@ -14,11 +20,24 @@ class WidgetSettingsBloc
     required this.getWidgetSettings,
     required this.updateWidgetAppearance,
   }) : super(const WidgetSettingsInitial()) {
-    on<LoadWidgetSettingsEvent>(_onLoadSettings);
-    on<UpdateBackgroundColorEvent>(_onUpdateBackgroundColor);
-    on<UpdateTextColorEvent>(_onUpdateTextColor);
+    on<LoadWidgetSettingsEvent>(
+      _onLoadSettings,
+      transformer: droppable(),
+    );
+    on<UpdateBackgroundColorEvent>(
+      _onUpdateBackgroundColor,
+      transformer: _debounce(const Duration(milliseconds: 100)),
+    );
+    on<UpdateTextColorEvent>(
+      _onUpdateTextColor,
+      transformer: _debounce(const Duration(milliseconds: 100)),
+    );
     on<ToggleGlassModeEvent>(_onToggleGlassMode);
-    on<SaveWidgetSettingsEvent>(_onSaveSettings);
+    on<UpdateWidgetFontEvent>(_onUpdateWidgetFont);
+    on<SaveWidgetSettingsEvent>(
+      _onSaveSettings,
+      transformer: droppable(),
+    );
   }
 
   Future<void> _onLoadSettings(
@@ -71,6 +90,19 @@ class WidgetSettingsBloc
         settings: currentState.settings.copyWith(
           isGlassModeEnabled: !currentState.settings.isGlassModeEnabled,
         ),
+        hasUnsavedChanges: true,
+      ));
+    }
+  }
+
+  void _onUpdateWidgetFont(
+    UpdateWidgetFontEvent event,
+    Emitter<WidgetSettingsState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is WidgetSettingsLoaded) {
+      emit(WidgetSettingsLoaded(
+        settings: currentState.settings.copyWith(fontKey: event.fontKey),
         hasUnsavedChanges: true,
       ));
     }

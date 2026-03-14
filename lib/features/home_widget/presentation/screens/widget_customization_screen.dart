@@ -1,6 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/app_font.dart';
+import '../../../../core/widgets/responsive_center.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../quote/presentation/bloc/quote_bloc.dart';
 import '../../../quote/presentation/bloc/quote_state.dart';
@@ -21,30 +22,11 @@ class WidgetCustomizationScreen extends StatefulWidget {
 
 class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
   bool _wasSaving = false;
-  bool _isIOS26OrLater = false;
 
   @override
   void initState() {
     super.initState();
     context.read<WidgetSettingsBloc>().add(const LoadWidgetSettingsEvent());
-    _checkIOSVersion();
-  }
-
-  Future<void> _checkIOSVersion() async {
-    if (Platform.isIOS) {
-      // Get iOS version from operatingSystemVersion
-      // Format is like "Version 26.0 (Build 12345)" or "26.0"
-      final versionString = Platform.operatingSystemVersion;
-      final match = RegExp(r'(\d+)\.').firstMatch(versionString);
-      if (match != null) {
-        final majorVersion = int.tryParse(match.group(1) ?? '0') ?? 0;
-        if (majorVersion >= 26) {
-          setState(() {
-            _isIOS26OrLater = true;
-          });
-        }
-      }
-    }
   }
 
   @override
@@ -159,11 +141,12 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
     AppLocalizations l10n,
   ) {
     return SingleChildScrollView(
+      child: ResponsiveCenter(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Widget Preview (force disable glass on iOS 26+)
+          // Widget Preview
           BlocBuilder<QuoteBloc, QuoteState>(
             builder: (context, quoteState) {
               String? quoteText;
@@ -174,7 +157,7 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
               }
               return WidgetPreview(
                 settings: settings,
-                forceDisableGlass: _isIOS26OrLater,
+                forceDisableGlass: true,
                 quoteText: quoteText,
                 author: author,
               );
@@ -182,13 +165,11 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
           ),
           const SizedBox(height: 32),
 
-          // Glass Mode Toggle (hidden on iOS 26+ due to known issues)
-          if (!_isIOS26OrLater) ...[
-            _buildGlassModeToggle(context, settings, isSaving, l10n),
-            const SizedBox(height: 16),
-          ],
+          // Font Picker
+          _buildFontPicker(context, settings, isSaving, l10n),
+          const SizedBox(height: 16),
 
-          // Background Color Picker (disabled when glass mode is on, but not on iOS 26+)
+          // Background Color Picker
           _buildBackgroundColorPicker(context, settings, isSaving, l10n),
           const SizedBox(height: 16),
 
@@ -200,6 +181,7 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
           // Info text
           _buildInfoBox(context, l10n),
         ],
+      ),
       ),
     );
   }
@@ -231,34 +213,77 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
     );
   }
 
-  Widget _buildGlassModeToggle(
+  Widget _buildFontPicker(
     BuildContext context,
     WidgetSettings settings,
     bool isSaving,
     AppLocalizations l10n,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final currentFont = AppFont.fromKey(settings.fontKey);
 
     return Card(
-      child: SwitchListTile(
-        title: Text(l10n.frostedGlassEffect),
-        subtitle: Text(l10n.frostedGlassDescription),
-        value: settings.isGlassModeEnabled,
-        onChanged: isSaving
-            ? null
-            : (_) => context
-                .read<WidgetSettingsBloc>()
-                .add(const ToggleGlassModeEvent()),
-        secondary: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.blur_on,
-            color: colorScheme.primary,
-          ),
+      child: ListTile(
+        leading: const Icon(Icons.text_fields),
+        title: const Text('Widget Font'),
+        subtitle: Text(currentFont.displayName),
+        trailing: const Icon(Icons.chevron_right),
+        enabled: !isSaving,
+        onTap: !isSaving
+            ? () => _showFontPicker(context, settings.fontKey)
+            : null,
+      ),
+    );
+  }
+
+  void _showFontPicker(BuildContext context, String currentFontKey) {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Select Font',
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Navigator.pop(sheetContext),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            for (final font in AppFont.values)
+              ListTile(
+                title: Text(
+                  font.displayName,
+                  style: font.primaryStyle.copyWith(fontSize: 16),
+                ),
+                subtitle: Text(
+                  '"The happiness of your life..."',
+                  style: font.primaryStyle.copyWith(
+                    fontSize: 13,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                trailing: font.key == currentFontKey
+                    ? Icon(Icons.check_circle,
+                        color: Theme.of(sheetContext).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  context
+                      .read<WidgetSettingsBloc>()
+                      .add(UpdateWidgetFontEvent(font.key));
+                  Navigator.pop(sheetContext);
+                },
+              ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );
@@ -270,25 +295,16 @@ class _WidgetCustomizationScreenState extends State<WidgetCustomizationScreen> {
     bool isSaving,
     AppLocalizations l10n,
   ) {
-    // On iOS 26+, glass mode is disabled, so background is always enabled
-    final isDisabled = !_isIOS26OrLater && (settings.isGlassModeEnabled || isSaving);
-
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
-      opacity: isDisabled ? 0.5 : 1.0,
-      child: ColorPickerTile(
-        title: l10n.backgroundColor,
-        subtitle: settings.isGlassModeEnabled && !_isIOS26OrLater
-            ? l10n.disabledWhenGlassOn
-            : l10n.tapToChange,
-        currentColor: Color(settings.backgroundColor),
-        enabled: !isDisabled,
-        onColorChanged: (color) {
-          context
-              .read<WidgetSettingsBloc>()
-              .add(UpdateBackgroundColorEvent(color.toARGB32()));
-        },
-      ),
+    return ColorPickerTile(
+      title: l10n.backgroundColor,
+      subtitle: l10n.tapToChange,
+      currentColor: Color(settings.backgroundColor),
+      enabled: !isSaving,
+      onColorChanged: (color) {
+        context
+            .read<WidgetSettingsBloc>()
+            .add(UpdateBackgroundColorEvent(color.toARGB32()));
+      },
     );
   }
 

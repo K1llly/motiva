@@ -22,13 +22,10 @@ class UpdateWidgetAppearance
     final saveResult =
         await settingsRepository.saveWidgetSettings(params.settings);
 
-    return saveResult.fold(
-      (failure) => Left(failure),
-      (_) async {
-        // Trigger widget refresh
-        return await widgetRepository.refreshWidget();
-      },
-    );
+    if (saveResult.isLeft()) {
+      return saveResult;
+    }
+    return await widgetRepository.refreshWidget();
   }
 }
 

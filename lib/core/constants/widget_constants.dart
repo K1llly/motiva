@@ -22,5 +22,11 @@ class WidgetConstants {
 
   /// Widget sync keys (for independent quote calculation)
   static const String startDateKey = 'widget_start_date';
-  static const String shuffledOrderKey = 'widget_shuffled_order';
+  static const String userSeedKey = 'widget_user_seed';
+
+  /// Pre-cached translated quotes for upcoming days (JSON string)
+  static const String translatedCacheKey = 'widget_translated_cache';
+
+  /// Widget font preference
+  static const String widgetFontKey = 'widget_font';
 }

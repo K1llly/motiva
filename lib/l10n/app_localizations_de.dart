@@ -101,5 +101,117 @@ class AppLocalizationsDe extends AppLocalizations {
   String get russian => 'Русский';
 
   @override
+  String get spanish => 'Español';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get portuguese => 'Português';
+
+  @override
+  String get italian => 'Italiano';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get chinese => '中文';
+
+  @override
+  String get japanese => '日本語';
+
+  @override
+  String get korean => '한국어';
+
+  @override
+  String get hindi => 'हिन्दी';
+
+  @override
   String get dailyStoicQuote => 'Tägliches Stoisches Zitat';
+
+  @override
+  String get languages => 'Sprachen';
+
+  @override
+  String get notifications => 'Benachrichtigungen';
+
+  @override
+  String get appearance => 'Erscheinungsbild';
+
+  @override
+  String get enableNotifications => 'Benachrichtigungen aktivieren';
+
+  @override
+  String get notificationTime => 'Benachrichtigungszeit';
+
+  @override
+  String get dailyReminder => 'Tägliche Erinnerung';
+
+  @override
+  String get receiveQuoteDaily => 'Erhalte täglich ein stoisches Zitat';
+
+  @override
+  String get themeMode => 'Thema';
+
+  @override
+  String get systemTheme => 'System';
+
+  @override
+  String get lightTheme => 'Hell';
+
+  @override
+  String get darkTheme => 'Dunkel';
+
+  @override
+  String get onboardingWelcomeTitle => 'Willkommen bei Motiva';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Ihre tägliche Quelle stoischer Weisheit, die Sie auf Ihrem Lebensweg inspiriert und leitet.';
+
+  @override
+  String get onboardingLanguageTitle => 'Wählen Sie Ihre Sprache';
+
+  @override
+  String get onboardingLanguageDescription =>
+      'Wählen Sie Ihre bevorzugte Sprache für Zitate und die App-Oberfläche.';
+
+  @override
+  String get onboardingReadyTitle => 'Alles bereit!';
+
+  @override
+  String get onboardingReadyDescription =>
+      'Erhalten Sie täglich stoische Zitate, die Ihre Reise inspirieren.';
+
+  @override
+  String get onboardingGetStarted => 'Starten Sie Ihre Reise';
+
+  @override
+  String get onboardingNext => 'Weiter';
+
+  @override
+  String get favorites => 'Favoriten';
+
+  @override
+  String get noFavorites => 'Noch keine Favoriten';
+
+  @override
+  String get noFavoritesDescription =>
+      'Tippen Sie auf das Herz-Symbol bei einem Zitat, um es hier zu speichern.';
+
+  @override
+  String get addedToFavorites => 'Zu Favoriten hinzugefügt';
+
+  @override
+  String get removedFromFavorites => 'Aus Favoriten entfernt';
+
+  @override
+  String get font => 'Font';
+
+  @override
+  String get widgetFont => 'Widget Font';
+
+  @override
+  String get selectFont => 'Select Font';
 }

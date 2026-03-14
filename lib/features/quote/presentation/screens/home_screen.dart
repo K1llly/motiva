@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/widgets/responsive_center.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/services/quote_translation_service.dart';
+import '../../../../di/injection_container.dart' as di;
 import '../../domain/entities/quote.dart';
 import '../bloc/quote_bloc.dart';
 import '../bloc/quote_event.dart';
 import '../bloc/quote_state.dart';
 import '../widgets/quote_card.dart';
-import '../../../streak/presentation/bloc/streak_bloc.dart';
-import '../../../streak/presentation/bloc/streak_event.dart';
-import '../../../streak/presentation/widgets/streak_counter.dart';
 import '../../../sharing/presentation/widgets/share_bottom_sheet.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,14 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load daily quote when screen opens
     context.read<QuoteBloc>().add(const LoadDailyQuoteEvent());
-  }
-
-  @override
-  void dispose() {
-    // Future-proof: add any controller/subscription cleanup here
-    super.dispose();
   }
 
   @override
@@ -46,7 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () => Navigator.pushNamed(context, '/widget-customization'),
         ),
         actions: [
-          const StreakCounter(),
+          IconButton(
+            icon: const Icon(Icons.favorite_border),
+            tooltip: l10n.favorites,
+            onPressed: () => Navigator.pushNamed(context, '/favorites'),
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: l10n.settings,
@@ -55,34 +54,32 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: BlocListener<QuoteBloc, QuoteState>(
-        listener: (context, state) {
-          // Reload streak after quote is loaded (streak was incremented)
-          if (state is QuoteLoaded) {
-            context.read<StreakBloc>().add(const LoadStreakEvent());
-          }
-        },
-        child: BlocBuilder<QuoteBloc, QuoteState>(
-          builder: (context, state) {
-            if (state is QuoteInitial || state is QuoteLoading) {
+      // BlocBuilder<SettingsBloc> forces rebuild when language changes
+      body: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, settingsState) {
+          return BlocConsumer<QuoteBloc, QuoteState>(
+            listener: (context, state) {},
+            builder: (context, state) {
+              if (state is QuoteInitial || state is QuoteLoading) {
+                return const _LoadingView();
+              } else if (state is QuoteLoaded) {
+                return _QuoteView(
+                  quote: state.quote,
+                  onShare: () => _showShareSheet(context, state.quote),
+                  onViewMeaning: () => _navigateToMeaning(context, state.quote),
+                );
+              } else if (state is QuoteError) {
+                return _ErrorView(
+                  message: state.message,
+                  onRetry: () => context.read<QuoteBloc>().add(
+                        const LoadDailyQuoteEvent(),
+                      ),
+                );
+              }
               return const _LoadingView();
-            } else if (state is QuoteLoaded) {
-              return _QuoteView(
-                quote: state.quote,
-                onShare: () => _showShareSheet(context, state.quote),
-                onViewMeaning: () => _navigateToMeaning(context, state.quote),
-              );
-            } else if (state is QuoteError) {
-              return _ErrorView(
-                message: state.message,
-                onRetry: () => context.read<QuoteBloc>().add(
-                      const LoadDailyQuoteEvent(),
-                    ),
-              );
-            }
-            return const _LoadingView();
-          },
-        ),
+            },
+          );
+        },
       ),
     );
   }
@@ -128,15 +125,19 @@ class _QuoteView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final translator = di.sl<QuoteTranslationService>();
 
-    return Padding(
+    return ResponsiveCenter(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
             child: Center(
-              child: QuoteCard(quote: quote),
+              child: QuoteCard(
+                quote: quote,
+                displayText: translator.getText(quote.id, quote.text),
+              ),
             ),
           ),
           const SizedBox(height: 32),
@@ -174,33 +175,30 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Cache theme references once
     final theme = Theme.of(context);
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: Text(l10n.retry),
-            ),
-          ],
-        ),
+    return ResponsiveCenter(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: onRetry,
+            child: Text(l10n.retry),
+          ),
+        ],
       ),
     );
   }

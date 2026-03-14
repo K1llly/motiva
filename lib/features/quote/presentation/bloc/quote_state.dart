@@ -19,14 +19,16 @@ class QuoteLoading extends QuoteState {
 class QuoteLoaded extends QuoteState {
   final Quote quote;
   final bool canViewMeaning;
+  final String locale;
 
   const QuoteLoaded({
     required this.quote,
     this.canViewMeaning = true,
+    this.locale = 'en',
   });
 
   @override
-  List<Object?> get props => [quote, canViewMeaning];
+  List<Object?> get props => [quote, canViewMeaning, locale];
 }
 
 class QuoteError extends QuoteState {

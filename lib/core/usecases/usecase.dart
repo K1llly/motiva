@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
 import '../errors/failures.dart';
 
 /// Base UseCase interface following the Command pattern
@@ -8,6 +9,8 @@ abstract class UseCase<T, Params> {
 }
 
 /// For use cases that don't need parameters
-class NoParams {
+class NoParams extends Equatable {
   const NoParams();
+  @override
+  List<Object?> get props => [];
 }

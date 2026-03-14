@@ -101,5 +101,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String get russian => 'Русский';
 
   @override
+  String get spanish => 'Español';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get portuguese => 'Português';
+
+  @override
+  String get italian => 'Italiano';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get chinese => '中文';
+
+  @override
+  String get japanese => '日本語';
+
+  @override
+  String get korean => '한국어';
+
+  @override
+  String get hindi => 'हिन्दी';
+
+  @override
   String get dailyStoicQuote => 'Daily Stoic Quote';
+
+  @override
+  String get languages => 'Languages';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get enableNotifications => 'Enable Notifications';
+
+  @override
+  String get notificationTime => 'Notification Time';
+
+  @override
+  String get dailyReminder => 'Daily Reminder';
+
+  @override
+  String get receiveQuoteDaily => 'Receive a stoic quote every day';
+
+  @override
+  String get themeMode => 'Theme';
+
+  @override
+  String get systemTheme => 'System';
+
+  @override
+  String get lightTheme => 'Light';
+
+  @override
+  String get darkTheme => 'Dark';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to Motiva';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Your daily source of stoic wisdom to inspire and guide you through life\'s journey.';
+
+  @override
+  String get onboardingLanguageTitle => 'Choose Your Language';
+
+  @override
+  String get onboardingLanguageDescription =>
+      'Select your preferred language for quotes and the app interface.';
+
+  @override
+  String get onboardingReadyTitle => 'You\'re All Set!';
+
+  @override
+  String get onboardingReadyDescription =>
+      'Start receiving daily stoic quotes to inspire your journey.';
+
+  @override
+  String get onboardingGetStarted => 'Start Your Journey';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get noFavorites => 'No favorites yet';
+
+  @override
+  String get noFavoritesDescription =>
+      'Tap the heart icon on a quote to save it here.';
+
+  @override
+  String get addedToFavorites => 'Added to favorites';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get font => 'Font';
+
+  @override
+  String get widgetFont => 'Widget Font';
+
+  @override
+  String get selectFont => 'Select Font';
 }
