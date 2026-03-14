@@ -208,4 +208,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get selectFont => 'Select Font';
+
+  @override
+  String get detailColor => '细节颜色';
 }

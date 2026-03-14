@@ -69,5 +69,9 @@
   "removedFromFavorites": "즐겨찾기에서 제거됨",
   "font": "Font",
   "widgetFont": "Widget Font",
-  "selectFont": "Select Font"
+  "selectFont": "Select Font",
+  "detailColor": "세부 색상",
+  "@detailColor": {
+    "description": "Accent/detail color picker label for share card"
+  }
 }

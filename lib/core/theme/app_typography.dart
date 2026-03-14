@@ -69,16 +69,16 @@ class AppTypography {
 
   /// Context-aware accessors that read the current app font from SettingsBloc
   static TextStyle quoteStyle(BuildContext context) {
-    final font = _fontFromContext(context);
+    final font = currentFontFromContext(context);
     return quoteStyleFor(font);
   }
 
   static TextStyle authorStyle(BuildContext context) {
-    final font = _fontFromContext(context);
+    final font = currentFontFromContext(context);
     return authorStyleFor(font);
   }
 
-  static AppFont _fontFromContext(BuildContext context) {
+  static AppFont currentFontFromContext(BuildContext context) {
     try {
       final state = context.read<SettingsBloc>().state;
       if (state is SettingsLoaded) {

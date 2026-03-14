@@ -213,4 +213,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectFont => 'Select Font';
+
+  @override
+  String get detailColor => 'لون التفاصيل';
 }

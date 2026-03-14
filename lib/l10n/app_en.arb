@@ -334,5 +334,10 @@
   "selectFont": "Select Font",
   "@selectFont": {
     "description": "Font picker sheet title"
+  },
+
+  "detailColor": "Detail Color",
+  "@detailColor": {
+    "description": "Accent/detail color picker label for share card (quote marks, author, branding)"
   }
 }

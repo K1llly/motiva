@@ -4,6 +4,7 @@ import '../../../../core/widgets/responsive_center.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/services/quote_translation_service.dart';
 import '../../../../di/injection_container.dart' as di;
+import '../../../sharing/presentation/widgets/share_bottom_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_state.dart';
@@ -28,6 +29,16 @@ class QuoteDetailScreen extends StatelessWidget {
         title: Text(l10n.quoteMeaning),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => ShareBottomSheet(quote: quote),
+              );
+            },
+          ),
           FavoriteButton(quoteId: quote.id),
           const SizedBox(width: 8),
         ],

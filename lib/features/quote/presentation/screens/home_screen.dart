@@ -87,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showShareSheet(BuildContext context, Quote quote) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (_) => ShareBottomSheet(quote: quote),
     );
   }

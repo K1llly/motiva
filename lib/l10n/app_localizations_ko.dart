@@ -209,4 +209,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get selectFont => 'Select Font';
+
+  @override
+  String get detailColor => '세부 색상';
 }

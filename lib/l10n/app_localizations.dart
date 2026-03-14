@@ -521,6 +521,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Font'**
   String get selectFont;
+
+  /// Accent/detail color picker label for share card (quote marks, author, branding)
+  ///
+  /// In en, this message translates to:
+  /// **'Detail Color'**
+  String get detailColor;
 }
 
 class _AppLocalizationsDelegate

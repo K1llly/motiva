@@ -9,6 +9,7 @@ import '../../../quote/data/datasources/quote_local_datasource.dart';
 import '../../../quote/domain/entities/quote.dart';
 import '../../../settings/presentation/bloc/settings_bloc.dart';
 import '../../../settings/presentation/bloc/settings_state.dart';
+import '../../../sharing/presentation/widgets/share_bottom_sheet.dart';
 import '../bloc/favorites_bloc.dart';
 import '../bloc/favorites_event.dart';
 import '../bloc/favorites_state.dart';
@@ -173,6 +174,20 @@ class _FavoriteQuoteTile extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.share,
+                      size: 20,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => ShareBottomSheet(quote: quote),
+                      );
+                    },
                   ),
                   FavoriteButton(quoteId: quoteId, size: 20),
                 ],

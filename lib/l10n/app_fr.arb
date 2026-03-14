@@ -69,5 +69,9 @@
   "removedFromFavorites": "Retiré des favoris",
   "font": "Font",
   "widgetFont": "Widget Font",
-  "selectFont": "Select Font"
+  "selectFont": "Select Font",
+  "detailColor": "Couleur d'accent",
+  "@detailColor": {
+    "description": "Accent/detail color picker label for share card"
+  }
 }

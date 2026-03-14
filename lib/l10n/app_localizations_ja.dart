@@ -210,4 +210,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get selectFont => 'Select Font';
+
+  @override
+  String get detailColor => 'ディテールカラー';
 }

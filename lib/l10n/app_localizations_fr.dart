@@ -215,4 +215,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectFont => 'Select Font';
+
+  @override
+  String get detailColor => 'Couleur d\'accent';
 }

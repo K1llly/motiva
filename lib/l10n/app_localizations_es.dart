@@ -214,4 +214,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get selectFont => 'Select Font';
+
+  @override
+  String get detailColor => 'Color de detalle';
 }

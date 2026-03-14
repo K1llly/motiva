@@ -69,5 +69,9 @@
   "removedFromFavorites": "पसंदीदा से हटाया गया",
   "font": "Font",
   "widgetFont": "Widget Font",
-  "selectFont": "Select Font"
+  "selectFont": "Select Font",
+  "detailColor": "विवरण रंग",
+  "@detailColor": {
+    "description": "Accent/detail color picker label for share card"
+  }
 }

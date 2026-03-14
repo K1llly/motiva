@@ -39,7 +39,7 @@ let stoicQuotes: [StoicQuote] = [
     StoicQuote(text: "Life is long if you know how to use it.", author: "Seneca"),
     StoicQuote(text: "He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has.", author: "Epictetus"),
     StoicQuote(text: "Do not act as if you had ten thousand years to throw away. Death stands at your elbow. Be good for something while you live and it is in your power.", author: "Marcus Aurelius"),
-    StoicQuote(text: "We are more often frightened than hurt; and we suffer more from imagination than from reality.", author: "Seneca"),
+    StoicQuote(text: "We are more often frightened than hurt; and we suffer more from imagination than from reality.", author: "Seneca"), 
 ]
 
 // MARK: - Color Extension for ARGB Conversion
@@ -107,7 +107,6 @@ struct QuoteEntry: TimelineEntry {
     let date: Date
     let quoteText: String
     let author: String
-    let dayNumber: Int
     let backgroundColor: Color
     let textColor: Color
     let isGlassMode: Bool
@@ -126,7 +125,6 @@ struct QuoteEntry: TimelineEntry {
         date: Date(),
         quoteText: "The happiness of your life depends upon the quality of your thoughts.",
         author: "Marcus Aurelius",
-        dayNumber: 1,
         backgroundColor: Color(argb: 0xFF1A1A1A),
         textColor: .white,
         isGlassMode: false,
@@ -142,8 +140,6 @@ struct Provider: TimelineProvider {
     private let defaultBackgroundColor = 0xFF1A1A1A
     private let defaultTextColor = 0xFFFFFFFF
 
-    // Keys for storing widget-specific data
-    private let startDateKey = "widget_start_date"
     private let userSeedKey = "widget_user_seed"
 
     func placeholder(in context: Context) -> QuoteEntry {
@@ -174,8 +170,6 @@ struct Provider: TimelineProvider {
 
         let finalQuoteText: String
         let finalAuthor: String
-        let dayNumber = dict["day_number"] as? Int ?? 1
-
         if isDataFresh, let qt = dict["quote_text"] as? String, let a = dict["quote_author"] as? String, !qt.isEmpty {
             // Flutter data is fresh (from today) — use it directly (already translated)
             finalQuoteText = qt
@@ -200,7 +194,6 @@ struct Provider: TimelineProvider {
             date: Date(),
             quoteText: finalQuoteText,
             author: finalAuthor,
-            dayNumber: dayNumber,
             backgroundColor: Color(argb: backgroundColorValue),
             textColor: Color(argb: textColorValue),
             isGlassMode: isGlassMode,
@@ -248,23 +241,6 @@ struct Provider: TimelineProvider {
         }
 
         return (text, author)
-    }
-
-    /// Calculate the day number based on start date
-    private func calculateDayNumber(from dict: [String: Any], defaults: UserDefaults) -> Int {
-        let startDate: Date
-
-        if let storedTimestamp = dict[startDateKey] as? Double {
-            startDate = Date(timeIntervalSince1970: storedTimestamp)
-        } else {
-            // First time: set start date to today
-            startDate = Calendar.current.startOfDay(for: Date())
-            defaults.set(startDate.timeIntervalSince1970, forKey: startDateKey)
-        }
-
-        let today = Calendar.current.startOfDay(for: Date())
-        let days = Calendar.current.dateComponents([.day], from: startDate, to: today).day ?? 0
-        return days + 1 // Day 1 is the first day
     }
 
     /// Get the quote for today using date + user seed for deterministic randomness
@@ -482,36 +458,20 @@ struct ExtraLargeWidgetView: View {
     }
 
     var body: some View {
-        HStack(spacing: 32) {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("MOTIVA")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundStyle(textColor)
-                Text("Day \(entry.dayNumber)")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundStyle(secondaryColor)
-                Spacer()
-                Text("Daily Stoic Wisdom")
-                    .font(.caption)
-                    .foregroundStyle(textColor.opacity(0.5))
-            }
-            .frame(maxWidth: 150)
-
-            VStack(alignment: .center, spacing: 20) {
-                Spacer()
-                Text("\"\(entry.quoteText)\"")
-                    .font(.system(size: fontSize, design: entry.fontDesign))
-                    .italic()
-                    .foregroundStyle(textColor)
-                    .lineLimit(10)
-                    .minimumScaleFactor(0.6)
-                    .multilineTextAlignment(.center)
-                Spacer()
-                Text("- \(entry.author)")
-                    .font(.title3)
-                    .fontWeight(.medium)
-                    .foregroundStyle(secondaryColor)
-            }
+        VStack(alignment: .center, spacing: 20) {
+            Spacer()
+            Text("\"\(entry.quoteText)\"")
+                .font(.system(size: fontSize, design: entry.fontDesign))
+                .italic()
+                .foregroundStyle(textColor)
+                .lineLimit(10)
+                .minimumScaleFactor(0.6)
+                .multilineTextAlignment(.center)
+            Spacer()
+            Text("- \(entry.author)")
+                .font(.title3)
+                .fontWeight(.medium)
+                .foregroundStyle(secondaryColor)
         }
         .padding(32)
         .widgetBackground(isGlassMode: entry.isGlassMode, backgroundColor: entry.backgroundColor, renderingMode: renderingMode)
@@ -527,12 +487,8 @@ struct CircularWidgetView: View {
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
-            VStack(spacing: 0) {
-                Text("Day")
-                    .font(.system(size: 8, weight: .medium))
-                Text("\(entry.dayNumber)")
-                    .font(.system(size: 20, weight: .bold))
-            }
+            Image(systemName: "quote.opening")
+                .font(.system(size: 20, weight: .bold))
         }
         .containerBackground(for: .widget) { AccessoryWidgetBackground() }
     }
@@ -555,7 +511,7 @@ struct InlineWidgetView: View {
     let entry: QuoteEntry
 
     var body: some View {
-        Text("Day \(entry.dayNumber) - \(entry.author)")
+        Text("\(entry.author) - \(entry.quoteText)")
             .containerBackground(for: .widget) { AccessoryWidgetBackground() }
     }
 }
