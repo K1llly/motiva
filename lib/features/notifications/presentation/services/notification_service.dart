@@ -110,26 +110,50 @@ class NotificationService {
     );
   }
 
-  /// Schedule daily notification at specified time
-  Future<void> scheduleDailyNotification({
-    required String quoteText,
-    required String author,
+  /// Schedule the next N daily notifications, one per day, each carrying
+  /// that day's actual quote. We do NOT use [DateTimeComponents.time] —
+  /// that would freeze a single payload and replay it forever, causing
+  /// the "yesterday's quote" bug. Instead the app re-runs this on every
+  /// launch / settings change to keep the queue current.
+  Future<void> scheduleUpcomingDailyNotifications({
+    required List<UpcomingDailyQuote> entries,
     required int hour,
     required int minute,
   }) async {
-    final body = NotificationConstants.formatBody(quoteText, author);
+    // Clear previously queued daily slots so we never leak stale payloads.
+    for (int i = 0; i < NotificationConstants.upcomingDays; i++) {
+      await _notificationsPlugin
+          .cancel(NotificationConstants.dailyQuoteIdBase + i);
+    }
 
-    await _notificationsPlugin.zonedSchedule(
-      NotificationConstants.dailyQuoteNotificationId,
-      NotificationConstants.notificationTitle,
-      body,
-      _nextInstanceOfTime(hour, minute),
-      _buildNotificationDetails(body, author),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
-    );
+    final now = tz.TZDateTime.now(tz.local);
+
+    for (final entry in entries) {
+      final scheduled = tz.TZDateTime(
+        tz.local,
+        entry.date.year,
+        entry.date.month,
+        entry.date.day,
+        hour,
+        minute,
+      );
+
+      // Today's slot may already be in the past — skip it.
+      if (!scheduled.isAfter(now)) continue;
+
+      final body = NotificationConstants.formatBody(entry.text, entry.author);
+
+      await _notificationsPlugin.zonedSchedule(
+        NotificationConstants.dailyQuoteIdBase + entry.dayOffset,
+        NotificationConstants.notificationTitle,
+        body,
+        scheduled,
+        _buildNotificationDetails(body, entry.author),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   /// Cancel all scheduled notifications
@@ -175,29 +199,24 @@ class NotificationService {
     }
   }
 
-  /// Calculate next instance of specified time
-  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-
-    // If the time has passed today, schedule for tomorrow
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-
-    return scheduledDate;
-  }
-
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
     // App will open automatically when notification is tapped
     // Additional navigation logic can be added here if needed
   }
+}
+
+/// One day's worth of scheduling input for [NotificationService].
+class UpcomingDailyQuote {
+  final DateTime date;
+  final int dayOffset;
+  final String text;
+  final String author;
+
+  const UpcomingDailyQuote({
+    required this.date,
+    required this.dayOffset,
+    required this.text,
+    required this.author,
+  });
 }

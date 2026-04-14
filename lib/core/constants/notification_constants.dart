@@ -9,6 +9,12 @@ class NotificationConstants {
   // Notification IDs
   static const int dailyQuoteNotificationId = 1;
 
+  // Daily pre-schedule range. Each upcoming day gets its own notification ID
+  // in [dailyQuoteIdBase, dailyQuoteIdBase + upcomingDays). iOS caps pending
+  // local notifications at 64 per app — keep upcomingDays well under that.
+  static const int dailyQuoteIdBase = 1000;
+  static const int upcomingDays = 30;
+
   // Default Schedule Time (7:00 AM)
   static const int defaultHour = 7;
   static const int defaultMinute = 0;

@@ -168,9 +168,9 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          GridView.builder(
+          Flexible(
+            child: GridView.builder(
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 5,
               crossAxisSpacing: 10,
@@ -206,6 +206,7 @@ class _ColorPickerSheetState extends State<_ColorPickerSheet> {
                 ),
               );
             },
+          ),
           ),
           const SizedBox(height: 24),
           FilledButton(

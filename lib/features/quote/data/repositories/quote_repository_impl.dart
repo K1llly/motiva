@@ -25,6 +25,18 @@ class QuoteRepositoryImpl implements QuoteRepository {
   }
 
   @override
+  Future<Either<Failure, Quote>> getQuoteForDate(DateTime date) async {
+    try {
+      final quote = await localDataSource.getQuoteForDate(date);
+      return Right(quote);
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Quote>> getQuoteById(String id) async {
     try {
       final quote = await localDataSource.getQuoteById(id);

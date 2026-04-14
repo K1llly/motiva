@@ -8,6 +8,9 @@ abstract class QuoteRepository {
   /// Get today's quote based on day number since installation
   Future<Either<Failure, Quote>> getDailyQuote(int dayNumber);
 
+  /// Get the quote for a specific calendar date (used for pre-scheduling)
+  Future<Either<Failure, Quote>> getQuoteForDate(DateTime date);
+
   /// Get quote by specific ID
   Future<Either<Failure, Quote>> getQuoteById(String id);
 

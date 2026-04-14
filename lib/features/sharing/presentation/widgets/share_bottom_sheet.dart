@@ -200,18 +200,26 @@ class _ShareBottomSheetState extends State<ShareBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Share card preview
+              // Share card preview.
+              // The ClipRRect only affects the in-app preview. The captured
+              // PNG is the RepaintBoundary's full rect — we wrap the card
+              // in a same-color matte so exported images have no transparent
+              // corners (which otherwise show black on dark chat backgrounds).
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: RepaintBoundary(
                   key: _repaintKey,
-                  child: ShareCard(
-                    quoteText: translatedText,
-                    author: widget.quote.author,
-                    backgroundColor: _backgroundColor,
-                    primaryColor: _primaryColor,
-                    accentColor: _accentColor,
-                    font: _selectedFont,
+                  child: Container(
+                    color: _backgroundColor,
+                    padding: const EdgeInsets.all(24),
+                    child: ShareCard(
+                      quoteText: translatedText,
+                      author: widget.quote.author,
+                      backgroundColor: _backgroundColor,
+                      primaryColor: _primaryColor,
+                      accentColor: _accentColor,
+                      font: _selectedFont,
+                    ),
                   ),
                 ),
               ),

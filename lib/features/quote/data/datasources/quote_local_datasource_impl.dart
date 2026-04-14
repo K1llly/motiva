@@ -21,12 +21,20 @@ class QuoteLocalDataSourceImpl implements QuoteLocalDataSource {
 
   @override
   Future<QuoteModel> getQuoteForDay(int dayNumber) async {
-    final seed = await _getOrCreateUserSeed();
-    final now = DateTime.now();
+    return _quoteForDate(DateTime.now());
+  }
 
-    // Deterministic random index from today's date + user seed
+  @override
+  Future<QuoteModel> getQuoteForDate(DateTime date) async {
+    return _quoteForDate(date);
+  }
+
+  Future<QuoteModel> _quoteForDate(DateTime date) async {
+    final seed = await _getOrCreateUserSeed();
+
+    // Deterministic random index from date + user seed
     // Must match the iOS widget formula: abs(dateKey ^ seed) % totalQuotes
-    final dateKey = now.year * 10000 + now.month * 100 + now.day;
+    final dateKey = date.year * 10000 + date.month * 100 + date.day;
     final combined = dateKey ^ seed;
     final quoteIndex = (combined.abs() % AppConstants.totalQuotes) + 1;
 

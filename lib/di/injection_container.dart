@@ -234,8 +234,7 @@ void _initNotificationFeature() {
     () => ScheduleDailyNotification(
       notificationService: sl(),
       notificationRepository: sl(),
-      getDailyQuote: sl(),
-      getCurrentDayNumber: () => sl<DateUtilsService>().getCurrentDayNumber(),
+      quoteRepository: sl(),
       translationService: sl(),
     ),
   );

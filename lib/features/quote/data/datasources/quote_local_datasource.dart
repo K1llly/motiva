@@ -7,6 +7,12 @@ abstract class QuoteLocalDataSource {
   /// Throws [CacheException] if not found
   Future<QuoteModel> getQuoteForDay(int dayNumber);
 
+  /// Get quote for a specific calendar date using the same deterministic
+  /// formula as [getQuoteForDay], so future dates can be looked up
+  /// (e.g. for pre-scheduling notifications).
+  /// Throws [CacheException] if not found
+  Future<QuoteModel> getQuoteForDate(DateTime date);
+
   /// Get quote by ID
   Future<QuoteModel> getQuoteById(String id);
 
