@@ -120,11 +120,11 @@ class NotificationService {
     required int hour,
     required int minute,
   }) async {
-    // Clear previously queued daily slots so we never leak stale payloads.
-    for (int i = 0; i < NotificationConstants.upcomingDays; i++) {
-      await _notificationsPlugin
-          .cancel(NotificationConstants.dailyQuoteIdBase + i);
-    }
+    // Cancel every pending notification before rescheduling. cancelAll wipes
+    // the v1.2 queue (ids 1000..1029) plus the legacy v1.1 repeating entry
+    // (id 1, DateTimeComponents.time), which upgraders still have pending and
+    // would otherwise fire alongside the new queue with a frozen old quote.
+    await _notificationsPlugin.cancelAll();
 
     final now = tz.TZDateTime.now(tz.local);
 
